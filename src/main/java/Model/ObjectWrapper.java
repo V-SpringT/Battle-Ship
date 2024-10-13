@@ -8,7 +8,7 @@ public class ObjectWrapper  implements Serializable{
 //    public static final int EDIT_CUSTOMER = 3;
 //    public static final int SEARCH_CUSTOMER_BY_NAME = 5;
 //    public static final int REPLY_SEARCH_CUSTOMER = 6;
-//    public static final int SERVER_INFORM_CLIENT_NUMBER = 7;
+    public static final int SERVER_INFORM_CLIENT_NUMBER = 7;
      
     private int performative;
     private Object data;
