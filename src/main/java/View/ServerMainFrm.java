@@ -91,13 +91,11 @@ public class ServerMainFrm extends JFrame implements ActionListener{
         if(ae.getSource() instanceof JButton) {
             JButton clicked = (JButton)ae.getSource();
             if(clicked.equals(btnStartServer)) {// start button
-                if(!txtServerPort.getText().isEmpty() && (txtServerPort.getText().trim().length() > 0)) {//custom port
+                if(!txtServerPort.getText().isEmpty() && (txtServerPort.getText().trim().length() > 0)) {
                     int port = Integer.parseInt(txtServerPort.getText().trim());
-                    myServer = //new SimpleServerCtr(this, port);
-                                 new Server(this, port);
-                }else {// default port
-                    myServer = //new SimpleServerCtr(this); 
-                                new Server(this);
+                    myServer = new Server(this, port);
+                }else {
+                    myServer =  new Server(this);
                 }
                 btnStopServer.setEnabled(true);
                 btnStartServer.setEnabled(false);
