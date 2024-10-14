@@ -13,14 +13,13 @@ import Dao.PlayerDAO;
 import Model.Player;
 import model.IPAddress;
 import model.ObjectWrapper;
-import tcp.server.view.ServerMainFrm;
- 
+import View.ServerMainFrm;
 public class Server {
     private ServerMainFrm view;
     private ServerSocket myServer;
     private ServerListening myListening;
     private ArrayList<ServerProcessing> myProcess;
-    private IPAddress myAddress = new IPAddress("localhost",8888);  //default server host and port
+    private IPAddress myAddress = new IPAddress("localhost",8888);  
      
     public Server(ServerMainFrm view){
         myProcess = new ArrayList<ServerProcessing>();
