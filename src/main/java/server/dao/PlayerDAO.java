@@ -14,9 +14,10 @@ public class PlayerDAO extends DAO {
         super();
     }
 
-    public boolean checkLogin(Player player) {
+    // return player id, "0" if not have
+    public String checkLogin(Player player) {
         boolean result = false;
-        String sql = "SELECT  id, name, position FROM tblUser WHERE username = ? AND password = ?";
+        String sql = "SELECT  id, name FROM player WHERE username = ? AND password = ?";
         try {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, player.getUsername());
@@ -27,11 +28,11 @@ public class PlayerDAO extends DAO {
                 player.setId(rs.getInt("id"));
                 player.setName(rs.getString("name"));
             
-                result = true;
+                return String.valueOf(player.getId());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return "0";
     }
 }

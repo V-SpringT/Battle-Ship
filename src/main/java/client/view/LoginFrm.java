@@ -88,12 +88,13 @@ public class LoginFrm extends javax.swing.JFrame {
 
     public void receivedDataProcessing(ObjectWrapper data) {
         String result = (String) data.getData();
-        if (result.equals("true")) {
+        if (result.equals("0")) {
+            txtResult.setText("Sai tai khoan/mat khau");
+        } else {
+            mySocket.setPlayerId(Integer.parseInt(result));
             MainFrm mainFrm = new MainFrm(mySocket);
             mainFrm.setVisible(true);
             this.dispose();
-        } else {
-            txtResult.setText("Sai tai khoan/mat khau");
         }
     }
 

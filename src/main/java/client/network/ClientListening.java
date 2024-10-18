@@ -8,6 +8,8 @@ import client.controller.ClientCtr;
 import client.view.LoginFrm;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import shared.model.ObjectWrapper;
 
 public class ClientListening extends Thread {
@@ -19,17 +21,23 @@ public class ClientListening extends Thread {
         this.clientCtr = clientCtr;
     }
 
+    @Override
     public void run() {
         try {
             while (isListening) {
                 ObjectInputStream ois = new ObjectInputStream(clientCtr.getMySocket().getInputStream());
                 Object obj = ois.readObject();
                 if (obj instanceof ObjectWrapper) {
+                    System.out.println(obj);
                     ObjectWrapper data = (ObjectWrapper) obj;
                     if (data.getPerformative() == ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER) {
                         clientCtr.getView().showMessage("Number of client connecting to the server: " + data.getData());
                     } else {
-                        for (ObjectWrapper fto : clientCtr.getActiveFunction()) {
+                        List<ObjectWrapper> activeFunctionsCopy = new ArrayList<>(clientCtr.getActiveFunction());
+                        System.out.println(activeFunctionsCopy);
+//                        for (ObjectWrapper fto : clientCtr.getActiveFunction()) {
+                        for (ObjectWrapper fto : activeFunctionsCopy) {
+                            System.out.println("Client control active function: " + fto.toString());
                             if (fto.getPerformative() == data.getPerformative()) {
                                 switch (data.getPerformative()) {
                                     case ObjectWrapper.REPLY_LOGIN_USER:
@@ -44,7 +52,7 @@ public class ClientListening extends Thread {
 //                                        SearchCustomerFrm scv = (SearchCustomerFrm) fto.getData();
 //                                        scv.receivedDataProcessing(data);
 //                                        break;
-                                }
+                                    }
                             }
                         }
                     }
@@ -57,7 +65,7 @@ public class ClientListening extends Thread {
         } catch (ClassNotFoundException e) {
             clientCtr.getView().showMessage("Data received in unknown format!");
         } finally {
-            clientCtr.closeConnection();
+//            clientCtr.closeConnection();
         }
     }
 

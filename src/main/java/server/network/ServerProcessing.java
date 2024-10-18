@@ -51,11 +51,7 @@ public class ServerProcessing extends Thread {
                         case ObjectWrapper.LOGIN_USER:
                             Player player = (Player) data.getData();
                             PlayerDAO playerDAO = new PlayerDAO();
-                            if (playerDAO.checkLogin(player)) {
-                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, "true"));
-                            } else {
-                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, "false"));
-                            }
+                            oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, playerDAO.checkLogin(player)));
                             break;
 //                        case ObjectWrapper.EDIT_CUSTOMER:
 //                            Customer cl = (Customer) data.getData();

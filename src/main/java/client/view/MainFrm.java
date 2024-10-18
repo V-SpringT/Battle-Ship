@@ -18,6 +18,10 @@ public class MainFrm extends javax.swing.JFrame {
     public MainFrm(ClientCtr socket) {
         mySocket = socket;
         initComponents();
+
+        txtResult.setText(String.valueOf(mySocket.getPlayerId()));
+        mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_MAIN_USER, this));
+        
     }
 
     /**
@@ -32,7 +36,7 @@ public class MainFrm extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         txtResult = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setText("OK");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -69,18 +73,12 @@ public class MainFrm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        LoginFrm lgf = new LoginFrm(mySocket);
+        lgf.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public void receivedDataProcessing(ObjectWrapper data) {
-        String result = (String) data.getData();
-        if (result.equals("true")) {
-            MainFrm mainFrm = new MainFrm(mySocket);
-            mainFrm.setVisible(true);
-            this.dispose();
-        } else {
-            txtResult.setText("Sai tai khoan/mat khau");
-        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

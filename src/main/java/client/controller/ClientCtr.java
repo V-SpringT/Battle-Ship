@@ -20,7 +20,7 @@ public class ClientCtr {
     private ClientListening myListening;
     private ArrayList<ObjectWrapper> myFunction;
     private volatile boolean isConnected = false;
-    private int clientId;
+    private int playerId;
     private IPAddress serverAddress = new IPAddress("localhost", 8888);
 
     public ClientCtr(ConnectFrm view) {
@@ -91,4 +91,14 @@ public class ClientCtr {
     public Socket getMySocket() {
         return mySocket;
     }
+
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
+    }
+    
+    
 }
