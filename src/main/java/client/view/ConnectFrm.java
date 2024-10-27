@@ -47,7 +47,6 @@ public class ConnectFrm extends javax.swing.JFrame {
 
         jLabel2.setText("Server host:");
 
-        txtServerHost.setEditable(false);
         txtServerHost.setText("localhost");
 
         jLabel3.setText("Server port:");
