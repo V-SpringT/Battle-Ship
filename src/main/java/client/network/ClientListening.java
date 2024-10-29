@@ -6,6 +6,7 @@ package client.network;
 
 import client.controller.ClientCtr;
 import client.view.LoginFrm;
+import client.view.MainFrm;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -17,53 +18,62 @@ public class ClientListening extends Thread {
     private volatile boolean isListening = true;
     private ClientCtr clientCtr;
 
-    public ClientListening(ClientCtr clientCtr) {
+    private ObjectInputStream ois;
+
+    public ClientListening(ClientCtr clientCtr) throws IOException {
         this.clientCtr = clientCtr;
+        this.ois = new ObjectInputStream(clientCtr.getMySocket().getInputStream());
     }
 
     @Override
     public void run() {
         try {
             while (isListening) {
-                ObjectInputStream ois = new ObjectInputStream(clientCtr.getMySocket().getInputStream());
+//                ois = new ObjectInputStream(clientCtr.getMySocket().getInputStream());
                 Object obj = ois.readObject();
                 if (obj instanceof ObjectWrapper) {
                     System.out.println(obj);
                     ObjectWrapper data = (ObjectWrapper) obj;
                     if (data.getPerformative() == ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER) {
-                        clientCtr.getView().showMessage("Number of client connecting to the server: " + data.getData());
+                        clientCtr.getConnectFrm().showMessage("Number of client connecting to the server: " + data.getData());
                     } else {
-                        List<ObjectWrapper> activeFunctionsCopy = new ArrayList<>(clientCtr.getActiveFunction());
-                        System.out.println(activeFunctionsCopy);
-//                        for (ObjectWrapper fto : clientCtr.getActiveFunction()) {
-                        for (ObjectWrapper fto : activeFunctionsCopy) {
-                            System.out.println("Client control active function: " + fto.toString());
-                            if (fto.getPerformative() == data.getPerformative()) {
-                                switch (data.getPerformative()) {
-                                    case ObjectWrapper.REPLY_LOGIN_USER:
-                                        LoginFrm loginView = (LoginFrm) fto.getData();
-                                        loginView.receivedDataProcessing(data);
-                                        break;
-//                                    case ObjectWrapper.REPLY_EDIT_CUSTOMER:
-//                                        EditCustomerFrm ecv = (EditCustomerFrm) fto.getData();
-//                                        ecv.receivedDataProcessing(data);
-//                                        break;
-//                                    case ObjectWrapper.REPLY_SEARCH_CUSTOMER:
-//                                        SearchCustomerFrm scv = (SearchCustomerFrm) fto.getData();
-//                                        scv.receivedDataProcessing(data);
-//                                        break;
-                                    }
-                            }
+                        switch (data.getPerformative()) {
+                            case ObjectWrapper.SERVER_LOGIN_USER:
+                                clientCtr.getLoginFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_INFORM_CLIENT_WAITING:
+                                clientCtr.getMainFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.RECEIVE_PLAY_REQUEST:
+                                clientCtr.getMainFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_SET_GAME_READY:
+                                clientCtr.getMainFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
+                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_RANDOM_NOT_TURN:
+                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_RANDOM_TURN:
+                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_START_PLAY_GAME:
+                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
                         }
+
                     }
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
             if (isListening) {
-                clientCtr.getView().showMessage("Connection to server lost!");
+                clientCtr.getConnectFrm().showMessage("Connection to server lost!");
             }
         } catch (ClassNotFoundException e) {
-            clientCtr.getView().showMessage("Data received in unknown format!");
+            clientCtr.getConnectFrm().showMessage("Data received in unknown format!");
         } finally {
 //            clientCtr.closeConnection();
         }

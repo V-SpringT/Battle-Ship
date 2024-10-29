@@ -25,16 +25,19 @@ public class ServerCtr {
     private ServerSocket myServer;
     private ServerListening myListening;
     private ArrayList<ServerProcessing> myProcess;
+    private ArrayList<ServerProcessing> myWaitingProcess;
     private IPAddress myAddress = new IPAddress("localhost", 8888);
 
     public ServerCtr(ServerMainFrm view) {
         myProcess = new ArrayList<ServerProcessing>();
+        myWaitingProcess = new ArrayList<ServerProcessing>();
         this.view = view;
         openServer();
     }
 
     public ServerCtr(ServerMainFrm view, int serverPort) {
         myProcess = new ArrayList<ServerProcessing>();
+        myWaitingProcess = new ArrayList<ServerProcessing>();
         this.view = view;
         myAddress.setPort(serverPort);
         openServer();
@@ -67,17 +70,15 @@ public class ServerCtr {
         }
     }
 
-    public void publicClientNumber() {
-        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER, myProcess.size());
-        for (ServerProcessing sp : myProcess) {
-            sp.sendData(data);
-        }
-    }
-
     public void addServerProcessing(ServerProcessing sp) {
         myProcess.add(sp);
         view.showMessage("Number of client connecting to the server: " + myProcess.size());
         publicClientNumber();
+    }
+    
+    public void addWaitingProcessing(ServerProcessing sp) {
+        myWaitingProcess.add(sp);
+//        sendWaitingList();
     }
 
     public void removeServerProcessing(ServerProcessing sp) {
@@ -92,5 +93,31 @@ public class ServerCtr {
 
     public ServerSocket getMyServer() {
         return myServer;
+    }
+
+    public void publicClientNumber() {
+        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER, myProcess.size());
+        for (ServerProcessing sp : myProcess) {
+            sp.sendData(data);
+        }
+    }
+
+    public void sendWaitingList() {
+        String listUsername = "";
+        for (ServerProcessing sp : myWaitingProcess) {
+            listUsername += sp.getUsername() + "||";
+            System.out.println(sp.getUsername());
+        }
+        
+        System.out.println("Server send waiting list:");
+        System.out.println(listUsername);
+        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_WAITING, listUsername);
+        System.out.println(data);
+        for (ServerProcessing sp : myProcess) 
+            sp.sendData(data);
+    }
+
+    public ArrayList<ServerProcessing> getMyWaitingProcess() {
+        return myWaitingProcess;
     }
 }

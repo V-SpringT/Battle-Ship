@@ -16,7 +16,7 @@ public class LoginFrm extends javax.swing.JFrame {
         mySocket = socket;
         initComponents();
 
-        mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, this));
+//        mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, this));
     }
 
     /**
@@ -91,9 +91,17 @@ public class LoginFrm extends javax.swing.JFrame {
         if (result.equals("0")) {
             txtResult.setText("Sai tai khoan/mat khau");
         } else {
-            mySocket.setPlayerId(Integer.parseInt(result));
-            MainFrm mainFrm = new MainFrm(mySocket);
-            mainFrm.setVisible(true);
+            mySocket.setUsername(txtUsername.getText());
+            System.out.println(txtUsername.getText());
+            
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.LOGIN_SUCCESSFUL, mySocket.getUsername()));
+
+            if (mySocket.getMainFrm() == null) {
+                MainFrm mainFrm = new MainFrm(mySocket);
+                mySocket.setMainFrm(mainFrm);
+            }
+
+            mySocket.getMainFrm().setVisible(true);
             this.dispose();
         }
     }

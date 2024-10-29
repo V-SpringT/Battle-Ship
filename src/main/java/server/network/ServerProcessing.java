@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import server.controller.ServerCtr;
 import server.dao.PlayerDAO;
@@ -22,16 +23,25 @@ public class ServerProcessing extends Thread {
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
 
-    public ServerProcessing(Socket s, ServerCtr serverCtr) {
+    private String username;
+    private ServerProcessing enemy;
+    private boolean turn;
+    private boolean inGame = false;
+    private String message;
+    private boolean gameReady = false;
+
+    public ServerProcessing(Socket s, ServerCtr serverCtr) throws IOException {
         super();
         mySocket = s;
         this.serverCtr = serverCtr;
+        ois = new ObjectInputStream(mySocket.getInputStream());
+        oos = new ObjectOutputStream(mySocket.getOutputStream());
     }
 
     public void sendData(Object obj) {
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(mySocket.getOutputStream());
             oos.writeObject(obj);
+            oos.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,8 +51,6 @@ public class ServerProcessing extends Thread {
     public void run() {
         try {
             while (isRunning) {
-                ois = new ObjectInputStream(mySocket.getInputStream());
-                oos = new ObjectOutputStream(mySocket.getOutputStream());
                 Object o = ois.readObject();
                 if (o instanceof ObjectWrapper) {
                     ObjectWrapper data = (ObjectWrapper) o;
@@ -51,24 +59,113 @@ public class ServerProcessing extends Thread {
                         case ObjectWrapper.LOGIN_USER:
                             Player player = (Player) data.getData();
                             PlayerDAO playerDAO = new PlayerDAO();
-                            oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, playerDAO.checkLogin(player)));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, playerDAO.checkLogin(player)));
+//                            oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, playerDAO.checkLogin(player)));
                             break;
-//                        case ObjectWrapper.EDIT_CUSTOMER:
-//                            Customer cl = (Customer) data.getData();
-//                            CustomerDAO cd = new CustomerDAO();
-//                            boolean ok = cd.editCustomer(cl);
-//                            if (ok) {
-//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_EDIT_CUSTOMER, "ok"));
+                        case ObjectWrapper.LOGIN_SUCCESSFUL:
+                            String username = (String) data.getData();
+                            this.username = username;
+                            serverCtr.addWaitingProcessing(this);
+                            break;
+                        case ObjectWrapper.SEND_PLAY_REQUEST: // data la username nguoi nhan
+                            String username1 = (String) data.getData();
+                            boolean canSend = false;
+                            for (ServerProcessing sp : serverCtr.getMyWaitingProcess()) {
+                                if (sp.getUsername().equals(username1)) {
+                                    canSend = true;
+                                    System.out.println(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
+                                    enemy = sp;
+                                    enemy.enemy = this;
+                                    System.out.println("Enemy before send play request: " + enemy);
+                                    enemy.sendData(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
+//                                    sp.enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username)); // gui cho nguoi kia username nguoi moi
+//                                    sp.enemy.oos.flush();
+                                    break;
+                                }
+                            }
+
+                            System.out.println("Enemy before send play request after loop: " + enemy);
+
+                            if (!canSend) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_PLAY_REQUEST_ERROR));
+//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SEND_PLAY_REQUEST_ERROR));
+//                                oos.flush();
+                            }
+                            break;
+                        case ObjectWrapper.ACCEPTED_PLAY_REQUEST:
+//                            if (!enemy.inGame) {
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+//                                enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+//                                enemy.oos.flush();
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+//                                oos.flush();
+                            serverCtr.getMyWaitingProcess().remove(this);
+                            serverCtr.getMyWaitingProcess().remove(enemy);
+                            serverCtr.sendWaitingList();
+                            inGame = true;
+                            enemy.inGame = true;
 //                            } else {
-//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_EDIT_CUSTOMER, "false"));
+//                                enemy.sendData(new ObjectWrapper(ObjectWrapper.ENEMY_IN_GAME_ERROR));
 //                            }
-//                            break;
-//                        case ObjectWrapper.SEARCH_CUSTOMER_BY_NAME:
-//                            String key = (String) data.getData();
-//                            cd = new CustomerDAO();
-//                            ArrayList<Customer> result = cd.searchCustomer(key);
-//                            oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_SEARCH_CUSTOMER, result));
-//                            break;
+                            break;
+                        case ObjectWrapper.REJECTED_PLAY_REQUEST:
+                            // ?
+                            break;
+                        case ObjectWrapper.READY_PLAY_GAME: // data là arraylist vị trí các tàu dạng: / 32 33 / 42 43 44...
+                            gameReady = true;
+                            ArrayList<String> shipsLocation = (ArrayList<String>) data.getData();
+
+                            System.out.println("Bên server:");
+                            for (String x : shipsLocation) {
+                                System.out.print(x + " ");
+                            }
+                            
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, shipsLocation));
+
+                            if (enemy.gameReady == true) {
+                                if ((int) Math.random() * 10 % 2 == 0) {
+                                    turn = true;
+                                    sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_TURN));
+                                    
+                                    enemy.turn = false;
+                                    enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_NOT_TURN));
+                                } else {
+                                    turn = false;
+                                    sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_NOT_TURN));
+                                    enemy.turn = true;
+                                    enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_TURN));
+                                }
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_START_PLAY_GAME));
+                                enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_START_PLAY_GAME));
+                            }
+                            break;
+                        case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
+//                            oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, (String) data.getData()));
+//                            oos.flush();
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, (String) data.getData()));
+                            break; // Địch gửi vị trí tàu, người chơi lưu vào startgame về sau
+                        case ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY:
+//                            enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY, (String) data.getData()));
+//                            enemy.oos.flush();
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY, (String) data.getData()));
+                            break; // chuyển giao tin nhắn giữa 2 bên trong khi bắn nhau
+                        case ObjectWrapper.EXIT_MAIN_FORM:
+                            if (inGame) {
+                                serverCtr.getMyWaitingProcess().add(enemy);
+                                enemy.inGame = false;
+                                //                                    enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
+//                                    enemy.oos.flush();
+                                enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
+                                enemy.enemy = null;
+                            }
+                            serverCtr.getMyWaitingProcess().remove(this);
+                            serverCtr.sendWaitingList();
+                            break;
+                        case ObjectWrapper.UPDATE_WAITING_LIST_REQUEST:
+                            serverCtr.sendWaitingList();
+                            break;
+
                     }
 
                 }
@@ -84,6 +181,15 @@ public class ServerProcessing extends Thread {
 //            this.stop();
         } finally {
             serverCtr.removeServerProcessing(this);
+            if (inGame) {
+                serverCtr.getMyWaitingProcess().add(enemy);
+                enemy.inGame = false;
+                //                    enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
+//                    enemy.oos.flush();
+                enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
+                enemy.enemy = null;
+            }
+            serverCtr.getMyWaitingProcess().remove(this);
             closeSocket();
         }
     }
@@ -107,5 +213,18 @@ public class ServerProcessing extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public ServerProcessing getEnemy() {
+        return enemy;
+    }
+
+    @Override
+    public String toString() {
+        return "ServerProcessing{" + "username=" + username + ", inGame=" + inGame + ", message=" + message + '}';
     }
 }
