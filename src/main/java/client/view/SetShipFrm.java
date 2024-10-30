@@ -224,7 +224,7 @@ public class SetShipFrm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnReadyActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.EXIT_WHEN_PLAYING));
+        
     }//GEN-LAST:event_btnExitActionPerformed
 
 
@@ -433,7 +433,7 @@ public class SetShipFrm extends javax.swing.JFrame {
 //    }
 
     private void setCountDownTime() {
-        timeTask = new CountDownTimer(7);
+        timeTask = new CountDownTimer(17);
         timer = new Timer();
         timer.scheduleAtFixedRate(timeTask, 0, 1000);
 

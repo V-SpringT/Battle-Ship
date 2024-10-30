@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -33,6 +34,11 @@ public class PlayFrm extends javax.swing.JFrame {
 
     private HashMap<String, JToggleButton> buttonIndex = new HashMap<>();
     private HashMap<String, JToggleButton> buttonEnemyIndex = new HashMap<>();
+    
+    private HashSet<JToggleButton> buttonEnemyShooted = new HashSet<>(); // Lưu các nút đã bị bắn
+
+    private CountDownTimer timeTask;
+    private Timer timer;
 
     public PlayFrm(GameCtr gameController) {
         gameCtr = gameController;
@@ -41,18 +47,15 @@ public class PlayFrm extends javax.swing.JFrame {
         lblPlayer.setText(gameCtr.getMySocket().getUsername());
 
         setGrid();
-//        setCountDownTime();
-    }
-
-    // to design
-    public PlayFrm() {
-        initComponents();
-
-        setGrid();
-
-//        drawMyShips();
         SwingUtilities.invokeLater(this::drawMyShips);
-//        setCountDownTime();
+
+        if (gameCtr.isPlayerTurn()) {
+            startPlayerTurn();
+        } else {
+            startEnemyTurn();
+        }
+
+        setCountDownTime(17);
     }
 
     /**
@@ -66,11 +69,11 @@ public class PlayFrm extends javax.swing.JFrame {
 
         btnGroupDirection = new javax.swing.ButtonGroup();
         btnQuit = new javax.swing.JButton();
-        lblWaiting = new javax.swing.JLabel();
+        lblEnemyWaiting = new javax.swing.JLabel();
         lblPlayer = new javax.swing.JLabel();
         panelMatrixShipEnemy = new javax.swing.JPanel();
         lblTime = new javax.swing.JLabel();
-        lblWaiting2 = new javax.swing.JLabel();
+        lblWaiting = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtLog = new javax.swing.JTextArea();
         panelMatrixShip = new javax.swing.JPanel();
@@ -84,14 +87,18 @@ public class PlayFrm extends javax.swing.JFrame {
             }
         });
 
-        lblWaiting.setText("Your enemy turn !");
+        lblEnemyWaiting.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblEnemyWaiting.setText("Your enemy turn !");
 
         lblPlayer.setText("name player");
 
         panelMatrixShipEnemy.setBackground(new java.awt.Color(255, 255, 255));
         panelMatrixShipEnemy.setLayout(new java.awt.GridLayout(10, 10));
 
-        lblWaiting2.setText("Your turn !");
+        lblTime.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+
+        lblWaiting.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblWaiting.setText("Your turn !");
 
         txtLog.setColumns(20);
         txtLog.setRows(5);
@@ -105,11 +112,13 @@ public class PlayFrm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(9, 9, 9)
+                        .addGap(25, 25, 25)
                         .addComponent(lblPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(222, 222, 222)
+                        .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -119,15 +128,13 @@ public class PlayFrm extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(lblWaiting, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(lblWaiting2, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
                                         .addComponent(panelMatrixShip, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
-                                        .addComponent(panelMatrixShipEnemy, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
+                                        .addComponent(panelMatrixShipEnemy, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(lblEnemyWaiting, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lblWaiting, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(31, 31, 31)
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(28, 28, 28))))
@@ -135,8 +142,13 @@ public class PlayFrm extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -144,10 +156,9 @@ public class PlayFrm extends javax.swing.JFrame {
                             .addComponent(panelMatrixShipEnemy, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(panelMatrixShip, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblWaiting, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblWaiting2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblWaiting, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblEnemyWaiting, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(68, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1)
@@ -168,10 +179,10 @@ public class PlayFrm extends javax.swing.JFrame {
     private javax.swing.ButtonGroup btnGroupDirection;
     private javax.swing.JButton btnQuit;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblEnemyWaiting;
     private javax.swing.JLabel lblPlayer;
     private javax.swing.JLabel lblTime;
     private javax.swing.JLabel lblWaiting;
-    private javax.swing.JLabel lblWaiting2;
     private javax.swing.JPanel panelMatrixShip;
     private javax.swing.JPanel panelMatrixShipEnemy;
     private javax.swing.JTextArea txtLog;
@@ -210,26 +221,16 @@ public class PlayFrm extends javax.swing.JFrame {
     }
 
     private void drawMyShips() {
-        ArrayList<String> shipsLocation = ShipGenerator.generateShip();
-        for (String x : shipsLocation) {
-            System.out.print(x + " ");
-        }
-        System.out.println("");
+//        ArrayList<String> shipsLocation = ShipGenerator.generateShip();
 
-        JToggleButton firstButton = buttonIndex.get("00");
-        int buttonSize = firstButton.getWidth();
-        System.out.println("Button size before create draw: " + firstButton.getWidth() + " " + firstButton.getHeight());
-
+//        gameCtr.setEnemyShips(new ArrayList<String>(shipsLocation));
+//        gameCtr.setPlayerShips(new ArrayList<String>(shipsLocation));
         ShipDrawer drawer = new ShipDrawer(buttonIndex);
         List<String> currentShip = new ArrayList<>();
 
-        for (String loc : shipsLocation) {
+        for (String loc : gameCtr.getPlayerShips()) {
             if (loc.equals("/")) {
                 if (!currentShip.isEmpty()) {
-                    for (String x : currentShip) {
-                        System.out.print(x + "");
-                    }
-                    System.out.println("");
                     drawer.drawCompleteShip(currentShip);
                     currentShip = new ArrayList<>();
                 }
@@ -245,105 +246,181 @@ public class PlayFrm extends javax.swing.JFrame {
     }
 
     private void handleGridClick(ActionEvent e) {
+        JToggleButton button = (JToggleButton) e.getSource();
+        button.setSelected(false);
 
-//        JToggleButton button = (JToggleButton) e.getSource();
-//        button.setSelected(false);
-//
-//        if (shipSize == 0 || !isValidLocation(button.getName())) {
-//            System.out.println(shipSize + " " + button.getName());
-//            return;
-//        }
-//
-//        addShip(button.getName());
-//        shipListModel.remove(shipIndexList);
-//        resetShipSelection();
-//
-//        for (String x : shipsLocation) {
-//            System.out.print(x + " ");
-//        }
-//        System.out.println("");
+        String location = button.getName();
+        Object[] result = gameCtr.handleShot(location);
+        ShipDrawer drawer = new ShipDrawer(buttonEnemyIndex);
+        buttonEnemyShooted.add(button);
+
+        // dừng time khi bắn
+        timeTask.cancel();
+        timer.cancel();
+
+        if ((int) result[0] == 0) {
+            drawer.drawMiss(location);
+            txtLog.append("Bạn đã bắn hụt\n");
+            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_FAILTURE, location));
+        } else {
+            if (result[1] != null) {
+                String[] destroyedShip = (String[]) result[1];
+                drawer.drawDestroyedShip(destroyedShip);
+                if (!(boolean) result[2]) {
+                    txtLog.append("Bạn đã phá huỷ 1 con tàu\n");
+                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_SHIP, destroyedShip));
+                } else {
+                    txtLog.append("Bạn đã chiến thắng\n");
+                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_WIN, destroyedShip));
+                    timeTask.cancel();
+                    timer.cancel();
+                    JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
+                }
+            } else {
+                drawer.drawHit(location);
+                txtLog.append("Bạn đã bắn trúng 1 con tàu\n");
+                gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_POINT, location));
+            }
+        }
     }
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new PlayFrm().setVisible(true);
+//            }
+//        });
+//    }
+    private void setCountDownTime(int timeRemain) {
+        timeTask = new CountDownTimer(timeRemain);
+        timer = new Timer();
+        timer.scheduleAtFixedRate(timeTask, 0, 1000);
+
+        // Sử dụng Swing Timer để cập nhật form và kiểm tra khi hết giờ
+        new javax.swing.Timer(1000, e -> {
+            int timeRemaining = timeTask.getTimeRemaining();
+
+            // Cập nhật thời gian lên JLabel trong form
+            lblTime.setText(String.valueOf(timeRemaining));
+            lblTime.repaint();
+
+            // Kiểm tra khi hết giờ và xử lý trực tiếp trong form
+            if (timeRemaining <= 0) {
+                ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer
+                if (gameCtr.isPlayerTurn()) {
+                    txtLog.append("Bạn bị mất lượt\n");
+                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
+                    startEnemyTurn();
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        }).start();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new PlayFrm().setVisible(true);
-            }
-        });
     }
 
-    private void setCountDownTime() {
-//        timeTask = new CountDownTimer(7);
-//        timer = new Timer();
-//        timer.scheduleAtFixedRate(timeTask, 0, 1000);
-//
-//        // Sử dụng Swing Timer để cập nhật form và kiểm tra khi hết giờ
-//        new javax.swing.Timer(1000, e -> {
-//            int timeRemaining = timeTask.getTimeRemaining();
-//
-//            // Cập nhật thời gian lên JLabel trong form
-//            lblTime.setText(String.valueOf(timeRemaining));
-//            lblTime.repaint();
-//
-//            // Kiểm tra khi hết giờ và xử lý trực tiếp trong form
-//            if (timeRemaining <= 0) {
-//                ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer
-//                random();
-//                ready();
-//            }
-//        }).start();
+    // Phương thức bật/tắt trạng thái tương tác của lưới đối thủ
+    private void setEnemyGridEnabled(boolean enabled) {
+        for (JToggleButton button : buttonEnemyIndex.values()) {
+            if (!buttonEnemyShooted.contains(button))
+                button.setEnabled(enabled);
+        }
+    }
 
+    // Khi bắt đầu lượt của người chơi, kích hoạt lại lưới
+    public void startPlayerTurn() {
+        setEnemyGridEnabled(true);
+        lblEnemyWaiting.setVisible(false);
+        lblWaiting.setVisible(true);
+        setCountDownTime(16);
+        gameCtr.setPlayerTurn(true);
+    }
+
+    // Khi kết thúc lượt của người chơi, vô hiệu hóa lưới
+    public void startEnemyTurn() {
+        setEnemyGridEnabled(false);
+        lblEnemyWaiting.setVisible(true);
+        lblWaiting.setVisible(false);
+        setCountDownTime(16);
+        gameCtr.setPlayerTurn(false);
     }
 
     public void receivedDataProcessing(ObjectWrapper data) {
         switch (data.getPerformative()) {
-            case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
-                ArrayList<String> enemyShipsLocation = (ArrayList<String>) data.getData();
-                gameCtr.setEnemyShips(enemyShipsLocation);
+            case ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE:
+                ShipDrawer drawer = new ShipDrawer(buttonIndex);
+                drawer.drawMiss((String) data.getData());
+                txtLog.append("Đối thủ của bạn đã bắn hụt\n");
+                break;
+            case ObjectWrapper.SERVER_CHOOSE_TURN:
+                startPlayerTurn();
+                break;
+            case ObjectWrapper.SERVER_CHOOSE_NOT_TURN:
+                startEnemyTurn();
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT:
+                ShipDrawer drawer1 = new ShipDrawer(buttonIndex);
+                drawer1.drawHit((String) data.getData());
+                txtLog.append("Đối thủ của bạn đã bắn trúng tàu\n");
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP:
+                ShipDrawer drawer2 = new ShipDrawer(buttonIndex);
+                drawer2.drawDestroyedShip((String[]) data.getData());
+                txtLog.append("Đối thủ của bạn đã phá huỷ 1 con tàu\n");
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN:
+                txtLog.append("Đối thủ của bạn bị mất lượt\n");
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_LOSE:
+                ShipDrawer drawer4 = new ShipDrawer(buttonIndex);
+                drawer4.drawDestroyedShip((String[]) data.getData());
+                txtLog.append("Bạn đã thua cuộc\n");
+                timeTask.cancel();
+                timer.cancel();
+                JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
+                break;
+            case ObjectWrapper.SERVER_SEND_RESULT:
+                String result = (String) data.getData();
+                String[] resultAndUserName = result.split("\\|\\|");
 
-                for (String x : gameCtr.getEnemyShips()) {
-                    System.out.print(x);
+                if (resultAndUserName[0].equals("win")) {
+                    gameCtr.setResult(1);
+                    gameCtr.setUsernameEnemy(resultAndUserName[1]);
+                } else if (resultAndUserName[0].equals("lose")) {
+                    gameCtr.setResult(0);
+                    gameCtr.setUsernameEnemy(resultAndUserName[1]);
                 }
 
-                break;
-            case ObjectWrapper.SERVER_RANDOM_NOT_TURN:
-                gameCtr.setPlayerTurn(false);
-                break;
-            case ObjectWrapper.SERVER_RANDOM_TURN:
-                gameCtr.setPlayerTurn(true);
-                break;
-            case ObjectWrapper.SERVER_START_PLAY_GAME:
-                PlayFrm playFrm = new PlayFrm(gameCtr);
-                gameCtr.setPlayFrm(playFrm);
+                ResultFrm resultFrm = new ResultFrm(gameCtr);
+                gameCtr.setResultFrm(resultFrm);
 
-                gameCtr.getPlayFrm().setVisible(true);
+                gameCtr.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
-
         }
     }
 }

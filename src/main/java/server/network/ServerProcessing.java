@@ -30,6 +30,8 @@ public class ServerProcessing extends Thread {
     private String message;
     private boolean gameReady = false;
 
+    private int result; // 1 - win, 0 - lose, -1 - afk
+
     public ServerProcessing(Socket s, ServerCtr serverCtr) throws IOException {
         super();
         mySocket = s;
@@ -120,14 +122,14 @@ public class ServerProcessing extends Thread {
                             for (String x : shipsLocation) {
                                 System.out.print(x + " ");
                             }
-                            
+
                             enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, shipsLocation));
 
                             if (enemy.gameReady == true) {
                                 if ((int) Math.random() * 10 % 2 == 0) {
                                     turn = true;
                                     sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_TURN));
-                                    
+
                                     enemy.turn = false;
                                     enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_NOT_TURN));
                                 } else {
@@ -145,11 +147,6 @@ public class ServerProcessing extends Thread {
 //                            oos.flush();
                             sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, (String) data.getData()));
                             break; // Địch gửi vị trí tàu, người chơi lưu vào startgame về sau
-                        case ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY:
-//                            enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY, (String) data.getData()));
-//                            enemy.oos.flush();
-                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_MESSAGE_IN_PLAY, (String) data.getData()));
-                            break; // chuyển giao tin nhắn giữa 2 bên trong khi bắn nhau
                         case ObjectWrapper.EXIT_MAIN_FORM:
                             if (inGame) {
                                 serverCtr.getMyWaitingProcess().add(enemy);
@@ -165,7 +162,37 @@ public class ServerProcessing extends Thread {
                         case ObjectWrapper.UPDATE_WAITING_LIST_REQUEST:
                             serverCtr.sendWaitingList();
                             break;
-
+                        case ObjectWrapper.SHOOT_FAILTURE:
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE, data.getData()));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_TURN));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_NOT_TURN));
+                            break;
+                        case ObjectWrapper.SHOOT_HIT_POINT:
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT, data.getData()));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_NOT_TURN));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_TURN));
+                            break;
+                        case ObjectWrapper.SHOOT_HIT_SHIP:
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP, data.getData()));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_NOT_TURN));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_TURN));
+                            break;
+                        case ObjectWrapper.SHOOT_MISS_TURN:
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_TURN));
+                            break;
+                        case ObjectWrapper.SHOOT_HIT_WIN:
+                            result = 1;
+                            enemy.result = 0;
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_LOSE, data.getData()));
+                            break;
+                        case ObjectWrapper.GET_RESULT:
+                            if (result == 1) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "win||" + enemy.getUsername()));
+                            } else if (result == 0) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "lose||" + enemy.getUsername()));
+                            }
+                            break;
                     }
 
                 }

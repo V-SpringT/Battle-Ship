@@ -42,7 +42,8 @@ public class ClientListening extends Thread {
                                 clientCtr.getLoginFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_INFORM_CLIENT_WAITING:
-                                clientCtr.getMainFrm().receivedDataProcessing(data);
+                                if (clientCtr.getMainFrm() != null)
+                                    clientCtr.getMainFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.RECEIVE_PLAY_REQUEST:
                                 clientCtr.getMainFrm().receivedDataProcessing(data);
@@ -61,6 +62,30 @@ public class ClientListening extends Thread {
                                 break;
                             case ObjectWrapper.SERVER_START_PLAY_GAME:
                                 clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_CHOOSE_NOT_TURN:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_CHOOSE_TURN:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_LOSE:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_SEND_RESULT:
+                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
                                 break;
                         }
 
