@@ -21,11 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
 import shared.model.ObjectWrapper;
 
 public class PlayFrm extends javax.swing.JFrame {
@@ -34,7 +37,7 @@ public class PlayFrm extends javax.swing.JFrame {
 
     private HashMap<String, JToggleButton> buttonIndex = new HashMap<>();
     private HashMap<String, JToggleButton> buttonEnemyIndex = new HashMap<>();
-    
+
     private HashSet<JToggleButton> buttonEnemyShooted = new HashSet<>(); // Lưu các nút đã bị bắn
 
     private CountDownTimer timeTask;
@@ -78,7 +81,7 @@ public class PlayFrm extends javax.swing.JFrame {
         txtLog = new javax.swing.JTextArea();
         panelMatrixShip = new javax.swing.JPanel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnQuit.setText("Quit");
         btnQuit.addActionListener(new java.awt.event.ActionListener() {
@@ -333,9 +336,19 @@ public class PlayFrm extends javax.swing.JFrame {
             if (timeRemaining <= 0) {
                 ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer
                 if (gameCtr.isPlayerTurn()) {
-                    txtLog.append("Bạn bị mất lượt\n");
-                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
-                    startEnemyTurn();
+                    String allText = txtLog.getText();
+                    String[] lines = allText.split("\n");
+                    String lastLine = lines[lines.length - 1];
+//                    String lastLine = "";
+//                    if (txtLog.getLineCount() > 0) {
+//                        lastLine = txtLog.getText().substring(txtLog.getText().lastIndexOf('\n') + 1);
+//                    }
+                    System.out.println("Last line:" + lastLine);
+                    if (!lastLine.contains("Bạn bị mất lượt")) {
+                        txtLog.append("Bạn bị mất lượt\n");
+                        gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
+                    }
+//                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
                 }
             }
         }).start();
@@ -345,8 +358,9 @@ public class PlayFrm extends javax.swing.JFrame {
     // Phương thức bật/tắt trạng thái tương tác của lưới đối thủ
     private void setEnemyGridEnabled(boolean enabled) {
         for (JToggleButton button : buttonEnemyIndex.values()) {
-            if (!buttonEnemyShooted.contains(button))
+            if (!buttonEnemyShooted.contains(button)) {
                 button.setEnabled(enabled);
+            }
         }
     }
 

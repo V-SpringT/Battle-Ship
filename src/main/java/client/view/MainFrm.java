@@ -66,7 +66,7 @@ public class MainFrm extends javax.swing.JFrame {
         scrollWaitingList = new javax.swing.JScrollPane();
         lblPlayer = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnRequest.setText("Request");
         btnRequest.addActionListener(new java.awt.event.ActionListener() {

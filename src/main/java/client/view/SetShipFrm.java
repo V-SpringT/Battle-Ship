@@ -83,7 +83,7 @@ public class SetShipFrm extends javax.swing.JFrame {
         lblWaiting = new javax.swing.JLabel();
         lblPlayer = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnReady.setText("Ready");
         btnReady.addActionListener(new java.awt.event.ActionListener() {

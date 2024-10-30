@@ -67,7 +67,7 @@ public class ResultFrm extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         lblEnemyPoint = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnBack.setText("Quay về trang chủ");
         btnBack.addActionListener(new java.awt.event.ActionListener() {

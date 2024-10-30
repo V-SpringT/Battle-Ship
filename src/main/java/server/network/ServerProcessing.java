@@ -180,6 +180,7 @@ public class ServerProcessing extends Thread {
                         case ObjectWrapper.SHOOT_MISS_TURN:
                             enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
                             enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_TURN));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_NOT_TURN));
                             break;
                         case ObjectWrapper.SHOOT_HIT_WIN:
                             result = 1;

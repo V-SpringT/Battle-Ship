@@ -26,7 +26,8 @@ public class ServerCtr {
     private ServerListening myListening;
     private ArrayList<ServerProcessing> myProcess;
     private ArrayList<ServerProcessing> myWaitingProcess;
-    private IPAddress myAddress = new IPAddress("localhost", 8888);
+//    private IPAddress myAddress = new IPAddress("localhost", 8888);
+    private IPAddress myAddress = new IPAddress("26.87.126.183", 8888);
 
     public ServerCtr(ServerMainFrm view) {
         myProcess = new ArrayList<ServerProcessing>();
