@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.ClientCtr;
@@ -11,9 +7,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import server.dao.PlayerDAO;
-import shared.model.ObjectWrapper;
-import shared.model.Player;
+import shared.dto.ObjectWrapper;
 
 public class MainFrm extends javax.swing.JFrame {
 
@@ -25,7 +19,7 @@ public class MainFrm extends javax.swing.JFrame {
     public MainFrm(ClientCtr socket) {
         mySocket = socket;
         initComponents();
-        
+
         lblPlayer.setText(mySocket.getUsername());
 
         playerListModel = new DefaultListModel<>();
@@ -39,6 +33,7 @@ public class MainFrm extends javax.swing.JFrame {
         });
 
         scrollWaitingList.setViewportView(playerList);
+        setLocationRelativeTo(null);
     }
 
     @Override
@@ -65,6 +60,8 @@ public class MainFrm extends javax.swing.JFrame {
         btnClose = new javax.swing.JButton();
         scrollWaitingList = new javax.swing.JScrollPane();
         lblPlayer = new javax.swing.JLabel();
+        btnHistory = new javax.swing.JButton();
+        btnRanking = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -89,7 +86,23 @@ public class MainFrm extends javax.swing.JFrame {
             }
         });
 
+        scrollWaitingList.setAutoscrolls(true);
+
         lblPlayer.setText("name player");
+
+        btnHistory.setText("History");
+        btnHistory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHistoryActionPerformed(evt);
+            }
+        });
+
+        btnRanking.setText("Ranking");
+        btnRanking.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRankingActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -103,28 +116,35 @@ public class MainFrm extends javax.swing.JFrame {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(scrollWaitingList, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnClose)
                             .addComponent(btnRefresh)
-                            .addComponent(btnRequest))
-                        .addGap(31, 31, 31))))
+                            .addComponent(btnRequest)
+                            .addComponent(btnHistory)
+                            .addComponent(btnRanking))
+                        .addGap(25, 25, 25))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(79, 79, 79)
-                .addComponent(btnRequest)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnRefresh)
-                .addGap(28, 28, 28)
-                .addComponent(btnClose)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(scrollWaitingList, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addComponent(btnHistory)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnRequest)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnRefresh)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnRanking)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnClose))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(scrollWaitingList, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(20, 20, 20))
         );
 
@@ -154,9 +174,29 @@ public class MainFrm extends javax.swing.JFrame {
                 e.printStackTrace();
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Please select a player", "Error", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a player", "Error", JOptionPane.INFORMATION_MESSAGE);
         }
     }//GEN-LAST:event_btnRequestActionPerformed
+
+    private void btnHistoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistoryActionPerformed
+        if (mySocket.getHistoryFrm() == null) {
+            HistoryFrm historyFrm = new HistoryFrm(mySocket);
+            mySocket.setHistoryFrm(historyFrm);
+        }
+
+        mySocket.getHistoryFrm().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnHistoryActionPerformed
+
+    private void btnRankingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRankingActionPerformed
+        if (mySocket.getRankingFrm() == null) {
+            RankingFrm rankingFrm = new RankingFrm(mySocket);
+            mySocket.setRankingFrm(rankingFrm);
+        }
+
+        mySocket.getRankingFrm().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnRankingActionPerformed
 
     public void receivedDataProcessing(ObjectWrapper data) {
         switch (data.getPerformative()) {
@@ -182,9 +222,6 @@ public class MainFrm extends javax.swing.JFrame {
                 }
                 break;
             case ObjectWrapper.SERVER_SET_GAME_READY:
-//                SetShipFrm setShipFrm = new SetShipFrm(mySocket);
-//                mySocket.setSetShipFrm(setShipFrm);
-
                 GameCtr gameCtr = new GameCtr(mySocket);
                 mySocket.setGameCtr(gameCtr);
                 SetShipFrm setShipFrm = new SetShipFrm(gameCtr);
@@ -193,13 +230,12 @@ public class MainFrm extends javax.swing.JFrame {
                 gameCtr.getSetShipFrm().setVisible(true);
                 this.dispose();
                 break;
-//            case ObjectWrapper.ENEMY_IN_GAME_ERROR:
-//                JOptionPane.showMessageDialog(this, "Người chơi đã trong một trận đấu khác", "Lỗi", JOptionPane.ERROR_MESSAGE);
-//                break;
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClose;
+    private javax.swing.JButton btnHistory;
+    private javax.swing.JButton btnRanking;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnRequest;
     private javax.swing.JLabel lblPlayer;

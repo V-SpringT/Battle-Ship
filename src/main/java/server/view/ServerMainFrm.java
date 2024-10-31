@@ -1,11 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package server.view;
 
 import server.controller.ServerCtr;
-import shared.model.IPAddress;
+import shared.dto.IPAddress;
 
 public class ServerMainFrm extends javax.swing.JFrame {
 

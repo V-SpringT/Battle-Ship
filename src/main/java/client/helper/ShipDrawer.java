@@ -1,18 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package client.helper;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.imageio.ImageIO;
+
 import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 

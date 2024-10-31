@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package shared.model;
+package shared.dto;
 
 import java.io.Serializable;
 
@@ -14,10 +10,6 @@ public class ObjectWrapper implements Serializable {
     // server respone request login
     public static final int SERVER_LOGIN_USER = 2;
 
-//    public static final int REPLY_MAIN_USER = 3;
-//    public static final int EDIT_CUSTOMER = 3;
-//    public static final int SEARCH_CUSTOMER_BY_NAME = 5;
-//    public static final int REPLY_SEARCH_CUSTOMER = 6;
     // server gửi cập nhật số number client online
     public static final int SERVER_INFORM_CLIENT_NUMBER = 3;
 
@@ -99,7 +91,26 @@ public class ObjectWrapper implements Serializable {
 
     // server gửi kết quả hiển thị cho result form
     public static final int GET_RESULT = 33;
+    // Còn đây là client 2 afk khi đang chơi, server trả về cho playfrm
     public static final int SERVER_SEND_RESULT = 34;
+
+    // client 1 được xác định hết thời gian mà không bắn, mất lượt
+    public static final int QUIT_WHEN_SET_SHIP = 35;
+    // server gửi mất lượt về cho client kia
+    public static final int SERVER_TRANSFER_QUIT_WHEN_SET_SHIP = 36;
+
+    // client 1 được xác định hết thời gian mà không bắn, mất lượt
+    public static final int QUIT_WHEN_PLAY = 37;
+    // server gửi mất lượt về cho client kia
+    public static final int SERVER_TRANSFER_QUIT_WHEN_PLAY = 38;
+    
+    // xem kết quả xong ra trang chủ
+    public static final int BACK_TO_MAIN_FORM = 39;
+    
+    public static final int GET_HISTORY = 40;
+    public static final int GET_RANKING = 41;
+    public static final int SERVER_SEND_HISTORY = 42;
+    public static final int SERVER_SEND_RANKING = 43;
 
     private int performative;
     private Object data;

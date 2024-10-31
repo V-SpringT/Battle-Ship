@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package server.network;
 
 import java.io.IOException;
@@ -9,10 +5,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import server.controller.ServerCtr;
+import server.dao.MatchDAO;
 import server.dao.PlayerDAO;
-import shared.model.ObjectWrapper;
+import shared.model.Match;
+import shared.dto.ObjectWrapper;
+import shared.dto.PlayerHistory;
 import shared.model.Player;
 
 public class ServerProcessing extends Thread {
@@ -25,12 +25,14 @@ public class ServerProcessing extends Thread {
 
     private String username;
     private ServerProcessing enemy;
-    private boolean turn;
-    private boolean inGame = false;
-    private String message;
+    private boolean isOnline = false; // online
+    private boolean inGame = false;   // trong game
     private boolean gameReady = false;
 
-    private int result; // 1 - win, 0 - lose, -1 - afk
+    private String result; // win, loss, afk, cancelled
+
+    private PlayerDAO playerDAO = new PlayerDAO();
+    private MatchDAO matchDAO = new MatchDAO();
 
     public ServerProcessing(Socket s, ServerCtr serverCtr) throws IOException {
         super();
@@ -60,28 +62,26 @@ public class ServerProcessing extends Thread {
                     switch (data.getPerformative()) {
                         case ObjectWrapper.LOGIN_USER:
                             Player player = (Player) data.getData();
-                            PlayerDAO playerDAO = new PlayerDAO();
                             sendData(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, playerDAO.checkLogin(player)));
-//                            oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, playerDAO.checkLogin(player)));
                             break;
                         case ObjectWrapper.LOGIN_SUCCESSFUL:
                             String username = (String) data.getData();
                             this.username = username;
-                            serverCtr.addWaitingProcessing(this);
+                            inGame = false;
+                            isOnline = true;
+                            serverCtr.sendWaitingList();
                             break;
                         case ObjectWrapper.SEND_PLAY_REQUEST: // data la username nguoi nhan
                             String username1 = (String) data.getData();
                             boolean canSend = false;
-                            for (ServerProcessing sp : serverCtr.getMyWaitingProcess()) {
-                                if (sp.getUsername().equals(username1)) {
+                            for (ServerProcessing sp : serverCtr.getMyProcess()) {
+                                if (sp.getUsername().equals(username1) && !sp.inGame) {
                                     canSend = true;
                                     System.out.println(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
                                     enemy = sp;
                                     enemy.enemy = this;
                                     System.out.println("Enemy before send play request: " + enemy);
                                     enemy.sendData(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
-//                                    sp.enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username)); // gui cho nguoi kia username nguoi moi
-//                                    sp.enemy.oos.flush();
                                     break;
                                 }
                             }
@@ -90,26 +90,18 @@ public class ServerProcessing extends Thread {
 
                             if (!canSend) {
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_PLAY_REQUEST_ERROR));
-//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SEND_PLAY_REQUEST_ERROR));
-//                                oos.flush();
                             }
                             break;
                         case ObjectWrapper.ACCEPTED_PLAY_REQUEST:
-//                            if (!enemy.inGame) {
-                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
-//                                enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
-//                                enemy.oos.flush();
-                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
-//                                oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
-//                                oos.flush();
-                            serverCtr.getMyWaitingProcess().remove(this);
-                            serverCtr.getMyWaitingProcess().remove(enemy);
-                            serverCtr.sendWaitingList();
-                            inGame = true;
-                            enemy.inGame = true;
-//                            } else {
+                            if (!enemy.inGame && enemy.isOnline) {
+                                inGame = true;
+                                enemy.inGame = true;
+                                enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
+                                serverCtr.sendWaitingList();
+                            } else {
 //                                enemy.sendData(new ObjectWrapper(ObjectWrapper.ENEMY_IN_GAME_ERROR));
-//                            }
+                            }
                             break;
                         case ObjectWrapper.REJECTED_PLAY_REQUEST:
                             // ?
@@ -127,15 +119,11 @@ public class ServerProcessing extends Thread {
 
                             if (enemy.gameReady == true) {
                                 if ((int) Math.random() * 10 % 2 == 0) {
-                                    turn = true;
                                     sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_TURN));
 
-                                    enemy.turn = false;
                                     enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_NOT_TURN));
                                 } else {
-                                    turn = false;
                                     sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_NOT_TURN));
-                                    enemy.turn = true;
                                     enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_RANDOM_TURN));
                                 }
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_START_PLAY_GAME));
@@ -143,20 +131,11 @@ public class ServerProcessing extends Thread {
                             }
                             break;
                         case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
-//                            oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, (String) data.getData()));
-//                            oos.flush();
                             sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP, (String) data.getData()));
                             break; // Địch gửi vị trí tàu, người chơi lưu vào startgame về sau
                         case ObjectWrapper.EXIT_MAIN_FORM:
-                            if (inGame) {
-                                serverCtr.getMyWaitingProcess().add(enemy);
-                                enemy.inGame = false;
-                                //                                    enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
-//                                    enemy.oos.flush();
-                                enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
-                                enemy.enemy = null;
-                            }
-                            serverCtr.getMyWaitingProcess().remove(this);
+                            inGame = false;
+                            isOnline = false;
                             serverCtr.sendWaitingList();
                             break;
                         case ObjectWrapper.UPDATE_WAITING_LIST_REQUEST:
@@ -183,16 +162,73 @@ public class ServerProcessing extends Thread {
                             sendData(new ObjectWrapper(ObjectWrapper.SERVER_CHOOSE_NOT_TURN));
                             break;
                         case ObjectWrapper.SHOOT_HIT_WIN:
-                            result = 1;
-                            enemy.result = 0;
+                            result = "win";
+                            enemy.result = "loss";
                             enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_LOSE, data.getData()));
+
+                            // update result match ở đây (DAO)
+                            Match match = new Match(this.username, enemy.username, "win", "loss", 1, 0);
+                            matchDAO.updateMatchResult(match);
+
+                            playerDAO.updateWin(this.username);
+                            playerDAO.updateLoss(enemy.username);
+
                             break;
                         case ObjectWrapper.GET_RESULT:
-                            if (result == 1) {
+                            if (result.equals("win")) {
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "win||" + enemy.getUsername()));
-                            } else if (result == 0) {
-                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "lose||" + enemy.getUsername()));
+                            } else if (result.equals("loss")) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "loss||" + enemy.getUsername()));
+                            } else if (result.equals("cancelled")) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "cancelled||" + enemy.getUsername()));
                             }
+                            break;
+                        case ObjectWrapper.QUIT_WHEN_SET_SHIP:
+                            inGame = false;
+                            enemy.result = "cancelled";
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_SET_SHIP, this.username));
+
+                            Match match1 = new Match(this.username, enemy.username, "afk", "cancelled", -1, 0);
+                            matchDAO.updateMatchResult(match1);
+
+                            playerDAO.updateAfk(this.username);
+
+                            enemy = null;
+                            gameReady = false;
+
+                            serverCtr.sendWaitingList();
+
+                            break;
+                        case ObjectWrapper.QUIT_WHEN_PLAY:
+                            inGame = false;
+                            enemy.result = "cancelled";
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY, this.username));
+
+                            Match match2 = new Match(this.username, enemy.username, "afk", "cancelled", -1, 0);
+                            matchDAO.updateMatchResult(match2);
+
+                            playerDAO.updateAfk(this.username);
+
+                            serverCtr.sendWaitingList();
+
+                            enemy = null;
+                            gameReady = false;
+
+                            break;
+                        case ObjectWrapper.BACK_TO_MAIN_FORM:
+                            enemy = null;
+                            gameReady = false;
+                            inGame = false;
+                            serverCtr.sendWaitingList();
+                            break;
+                        case ObjectWrapper.GET_HISTORY:
+                            PlayerHistory playerHistory = playerDAO.getPlayerInfo(this.username);
+                            playerHistory.setListMatch(matchDAO.getMatchHistory(this.username));
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_HISTORY, playerHistory));
+                            break;
+                        case ObjectWrapper.GET_RANKING:
+                            List<PlayerHistory> leaderboard = playerDAO.getLeaderboard();
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RANKING, leaderboard));
                             break;
                     }
 
@@ -210,14 +246,10 @@ public class ServerProcessing extends Thread {
         } finally {
             serverCtr.removeServerProcessing(this);
             if (inGame) {
-                serverCtr.getMyWaitingProcess().add(enemy);
                 enemy.inGame = false;
-                //                    enemy.oos.writeObject(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
-//                    enemy.oos.flush();
                 enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_DISCONNECTED_CLIENT_ERROR));
                 enemy.enemy = null;
             }
-            serverCtr.getMyWaitingProcess().remove(this);
             closeSocket();
         }
     }
@@ -251,8 +283,16 @@ public class ServerProcessing extends Thread {
         return enemy;
     }
 
+    public boolean isInGame() {
+        return inGame;
+    }
+
+    public boolean isIsOnline() {
+        return isOnline;
+    }
+
     @Override
     public String toString() {
-        return "ServerProcessing{" + "username=" + username + ", inGame=" + inGame + ", message=" + message + '}';
+        return "ServerProcessing{" + "username=" + username + ", inGame=" + inGame + '}';
     }
 }

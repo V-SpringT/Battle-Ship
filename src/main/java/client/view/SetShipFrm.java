@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.GameCtr;
@@ -15,13 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
-import shared.model.ObjectWrapper;
+import shared.dto.ObjectWrapper;
 
 public class SetShipFrm extends javax.swing.JFrame {
 
@@ -49,17 +44,8 @@ public class SetShipFrm extends javax.swing.JFrame {
         initiateShips();
         setCountDownTime();
         lblWaiting.setVisible(false);
+        setLocationRelativeTo(null);
     }
-
-    // to design
-//    public SetShipFrm() {
-//        initComponents();
-//
-//        setGrid();
-//        initiateShips();
-////        setCountDownTime();
-//        lblWaiting.setVisible(false);
-//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -224,7 +210,15 @@ public class SetShipFrm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnReadyActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        
+        int k = JOptionPane.showConfirmDialog(this, "Bạn có thật sự muốn thoát trận đấu ? Điều này sẽ khiến bạn bị trừ điểm", "Thoát", JOptionPane.YES_NO_OPTION);
+        if (k == 0) {
+            timeTask.cancel();
+            timer.cancel();
+            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_SET_SHIP));
+
+            gameCtr.getMySocket().getMainFrm().setVisible(true);
+            this.dispose();
+        }
     }//GEN-LAST:event_btnExitActionPerformed
 
 
@@ -400,38 +394,6 @@ public class SetShipFrm extends javax.swing.JFrame {
         }
     }
 
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new SetShipFrm().setVisible(true);
-//            }
-//        });
-//    }
-
     private void setCountDownTime() {
         timeTask = new CountDownTimer(17);
         timer = new Timer();
@@ -494,6 +456,16 @@ public class SetShipFrm extends javax.swing.JFrame {
                 gameCtr.setPlayFrm(playFrm);
 
                 gameCtr.getPlayFrm().setVisible(true);
+                this.dispose();
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_SET_SHIP:
+                timeTask.cancel();
+                timer.cancel();
+                JOptionPane.showMessageDialog(this, "Đối thủ của bạn đã rời đi, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                ResultFrm resultFrm = new ResultFrm(gameCtr);
+                gameCtr.setResultFrm(resultFrm);
+
+                gameCtr.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
 

@@ -1,35 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.GameCtr;
 import client.helper.CountDownTimer;
 import client.helper.ShipDrawer;
-import client.helper.ShipGenerator;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
-import javax.swing.text.BadLocationException;
-import shared.model.ObjectWrapper;
+import shared.dto.ObjectWrapper;
 
 public class PlayFrm extends javax.swing.JFrame {
 
@@ -59,6 +42,7 @@ public class PlayFrm extends javax.swing.JFrame {
         }
 
         setCountDownTime(17);
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -102,6 +86,8 @@ public class PlayFrm extends javax.swing.JFrame {
 
         lblWaiting.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
         lblWaiting.setText("Your turn !");
+
+        jScrollPane1.setAutoscrolls(true);
 
         txtLog.setColumns(20);
         txtLog.setRows(5);
@@ -174,7 +160,15 @@ public class PlayFrm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitActionPerformed
+        int k = JOptionPane.showConfirmDialog(this, "Bạn có thật sự muốn thoát trận đấu ? Điều này sẽ khiến bạn bị trừ điểm", "Thoát", JOptionPane.YES_NO_OPTION);
+        if (k == 0) {
+            timeTask.cancel();
+            timer.cancel();
+            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_PLAY));
 
+            gameCtr.getMySocket().getMainFrm().setVisible(true);
+            this.dispose();
+        }
     }//GEN-LAST:event_btnQuitActionPerformed
 
 
@@ -224,10 +218,6 @@ public class PlayFrm extends javax.swing.JFrame {
     }
 
     private void drawMyShips() {
-//        ArrayList<String> shipsLocation = ShipGenerator.generateShip();
-
-//        gameCtr.setEnemyShips(new ArrayList<String>(shipsLocation));
-//        gameCtr.setPlayerShips(new ArrayList<String>(shipsLocation));
         ShipDrawer drawer = new ShipDrawer(buttonIndex);
         List<String> currentShip = new ArrayList<>();
 
@@ -278,7 +268,12 @@ public class PlayFrm extends javax.swing.JFrame {
                     timeTask.cancel();
                     timer.cancel();
                     JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
+//                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
+                    ResultFrm resultFrm = new ResultFrm(gameCtr);
+                    gameCtr.setResultFrm(resultFrm);
+
+                    gameCtr.getResultFrm().setVisible(true);
+                    this.dispose();
                 }
             } else {
                 drawer.drawHit(location);
@@ -288,37 +283,6 @@ public class PlayFrm extends javax.swing.JFrame {
         }
     }
 
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new PlayFrm().setVisible(true);
-//            }
-//        });
-//    }
     private void setCountDownTime(int timeRemain) {
         timeTask = new CountDownTimer(timeRemain);
         timer = new Timer();
@@ -339,16 +303,11 @@ public class PlayFrm extends javax.swing.JFrame {
                     String allText = txtLog.getText();
                     String[] lines = allText.split("\n");
                     String lastLine = lines[lines.length - 1];
-//                    String lastLine = "";
-//                    if (txtLog.getLineCount() > 0) {
-//                        lastLine = txtLog.getText().substring(txtLog.getText().lastIndexOf('\n') + 1);
-//                    }
-                    System.out.println("Last line:" + lastLine);
+
                     if (!lastLine.contains("Bạn bị mất lượt")) {
                         txtLog.append("Bạn bị mất lượt\n");
                         gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
                     }
-//                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
                 }
             }
         }).start();
@@ -415,22 +374,18 @@ public class PlayFrm extends javax.swing.JFrame {
                 timeTask.cancel();
                 timer.cancel();
                 JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-                gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
-                break;
-            case ObjectWrapper.SERVER_SEND_RESULT:
-                String result = (String) data.getData();
-                String[] resultAndUserName = result.split("\\|\\|");
-
-                if (resultAndUserName[0].equals("win")) {
-                    gameCtr.setResult(1);
-                    gameCtr.setUsernameEnemy(resultAndUserName[1]);
-                } else if (resultAndUserName[0].equals("lose")) {
-                    gameCtr.setResult(0);
-                    gameCtr.setUsernameEnemy(resultAndUserName[1]);
-                }
-
                 ResultFrm resultFrm = new ResultFrm(gameCtr);
                 gameCtr.setResultFrm(resultFrm);
+
+                gameCtr.getResultFrm().setVisible(true);
+                this.dispose();
+                break;
+            case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY:
+                timeTask.cancel();
+                timer.cancel();
+                JOptionPane.showMessageDialog(this, "Đối thủ của bạn đã rời đi, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                ResultFrm resultFrm1 = new ResultFrm(gameCtr);
+                gameCtr.setResultFrm(resultFrm1);
 
                 gameCtr.getResultFrm().setVisible(true);
                 this.dispose();

@@ -1,35 +1,24 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package shared.model;
 
 import java.io.Serializable;
 
 public class Player implements Serializable {
-    private int id;
+
     private String username;
     private String password;
-    private String name;
+    private int points;
+    private int totalWins;
+    private int totalLosses;
+    private int totalAfk;
 
     public Player() {
         super();
     }
 
-    public Player(int id, String username, String password) {
+    public Player(String username, String password) {
         super();
-        this.id = id;
         this.username = username;
         this.password = password;
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -48,13 +37,36 @@ public class Player implements Serializable {
         this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public int getPoints() {
+        return points;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPoints(int points) {
+        this.points = points;
     }
-    
-    
+
+    public int getTotalWins() {
+        return totalWins;
+    }
+
+    public void setTotalWins(int totalWins) {
+        this.totalWins = totalWins;
+    }
+
+    public int getTotalLosses() {
+        return totalLosses;
+    }
+
+    public void setTotalLosses(int totalLosses) {
+        this.totalLosses = totalLosses;
+    }
+
+    public int getTotalAfk() {
+        return totalAfk;
+    }
+
+    public void setTotalAfk(int totalAfk) {
+        this.totalAfk = totalAfk;
+    }
+
 }

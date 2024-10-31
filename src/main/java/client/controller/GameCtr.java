@@ -1,17 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package client.controller;
 
 import client.view.PlayFrm;
 import client.view.ResultFrm;
 import client.view.SetShipFrm;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,8 +18,6 @@ public class GameCtr {
     private ArrayList<String> playerShips;
     private ArrayList<String> enemyShips;
     private boolean playerTurn = true;
-    private int result;
-    private String usernameEnemy;
 
     // Thêm các biến để theo dõi trạng thái tàu
     private Map<String, Set<String>> shipGroups = new HashMap<>(); // Map để lưu các nhóm tàu
@@ -32,6 +26,9 @@ public class GameCtr {
     private SetShipFrm setShipFrm;
     private PlayFrm playFrm;
     private ResultFrm resultFrm;
+
+    public GameCtr() {
+    }
 
     public SetShipFrm getSetShipFrm() {
         return setShipFrm;
@@ -77,18 +74,6 @@ public class GameCtr {
         return enemyShips;
     }
 
-    public void setEnemyShips(ArrayList<String> enemyShips) {
-        this.enemyShips = enemyShips;
-        initializeShipEnemyGroups();
-    }
-
-//    public boolean isOpponentReady() {
-//        return opponentReady;
-//    }
-//
-//    public void setOpponentReady(boolean opponentReady) {
-//        this.opponentReady = opponentReady;
-//    }
     public boolean isPlayerTurn() {
         return playerTurn;
     }
@@ -97,7 +82,9 @@ public class GameCtr {
         this.playerTurn = playerTurn;
     }
 
-    public GameCtr() {
+    public void setEnemyShips(ArrayList<String> enemyShips) {
+        this.enemyShips = enemyShips;
+        initializeShipEnemyGroups();
     }
 
     private void initializeShipEnemyGroups() {
@@ -179,22 +166,6 @@ public class GameCtr {
 
         // So sánh với số ô đã bắn trúng
         return hitPositions.size() == totalShipPositions;
-    }
-
-    public int getResult() {
-        return result;
-    }
-
-    public void setResult(int result) {
-        this.result = result;
-    }
-
-    public String getUsernameEnemy() {
-        return usernameEnemy;
-    }
-
-    public void setUsernameEnemy(String usernameEnemy) {
-        this.usernameEnemy = usernameEnemy;
     }
 
 }

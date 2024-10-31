@@ -1,17 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package client.network;
 
 import client.controller.ClientCtr;
-import client.view.LoginFrm;
-import client.view.MainFrm;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import shared.model.ObjectWrapper;
+
+import shared.dto.ObjectWrapper;
 
 public class ClientListening extends Thread {
 
@@ -29,7 +23,6 @@ public class ClientListening extends Thread {
     public void run() {
         try {
             while (isListening) {
-//                ois = new ObjectInputStream(clientCtr.getMySocket().getInputStream());
                 Object obj = ois.readObject();
                 if (obj instanceof ObjectWrapper) {
                     System.out.println(obj);
@@ -42,8 +35,9 @@ public class ClientListening extends Thread {
                                 clientCtr.getLoginFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_INFORM_CLIENT_WAITING:
-                                if (clientCtr.getMainFrm() != null)
+                                if (clientCtr.getMainFrm() != null) {
                                     clientCtr.getMainFrm().receivedDataProcessing(data);
+                                }
                                 break;
                             case ObjectWrapper.RECEIVE_PLAY_REQUEST:
                                 clientCtr.getMainFrm().receivedDataProcessing(data);
@@ -85,7 +79,19 @@ public class ClientListening extends Thread {
                                 clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_SEND_RESULT:
+                                clientCtr.getGameCtr().getResultFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_SET_SHIP:
+                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY:
                                 clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_SEND_HISTORY:
+                                clientCtr.getHistoryFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_SEND_RANKING:
+                                clientCtr.getRankingFrm().receivedDataProcessing(data);
                                 break;
                         }
 

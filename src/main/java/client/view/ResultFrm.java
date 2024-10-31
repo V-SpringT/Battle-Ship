@@ -1,27 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.GameCtr;
-import client.helper.CountDownTimer;
-import client.helper.ShipDrawer;
-import client.helper.ShipGenerator;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JToggleButton;
-import shared.model.ObjectWrapper;
+import shared.dto.ObjectWrapper;
 
 public class ResultFrm extends javax.swing.JFrame {
 
@@ -30,20 +10,16 @@ public class ResultFrm extends javax.swing.JFrame {
     public ResultFrm(GameCtr gameController) {
         gameCtr = gameController;
         initComponents();
+        setLocationRelativeTo(null);
+    }
 
-        lblPlayer.setText(gameCtr.getMySocket().getUsername());
-        lblNamePlayer.setText(gameCtr.getMySocket().getUsername());
-        lblNameEnemy.setText(gameCtr.getUsernameEnemy());
-
-        if (gameCtr.getResult() == 1) {
-            lblResult.setText("BẠN ĐÃ CHIẾN THẮNG");
-            lblPlayerPoint.setText("+1");
-            lblEnemyPoint.setText("Không đổi");
-        } else {
-            lblResult.setText("BẠN ĐÃ THUA CUỘC");
-            lblEnemyPoint.setText("+1");
-            lblPlayerPoint.setText("Không đổi");
+    @Override
+    public void setVisible(boolean visible) {
+        if (visible) {
+            System.out.println("In result form: ");
+            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
         }
+        super.setVisible(visible);
     }
 
     /**
@@ -171,7 +147,10 @@ public class ResultFrm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        
+        gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.BACK_TO_MAIN_FORM));
+
+        gameCtr.getMySocket().getMainFrm().setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
 
@@ -189,62 +168,32 @@ public class ResultFrm extends javax.swing.JFrame {
     private javax.swing.JLabel lblResult;
     // End of variables declaration//GEN-END:variables
 
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(PlayFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new SetShipFrm().setVisible(true);
-//            }
-//        });
-//    }
-//    public void receivedDataProcessing(ObjectWrapper data) {
-//        switch (data.getPerformative()) {
-//            case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
-//                ArrayList<String> enemyShipsLocation = (ArrayList<String>) data.getData();
-//                gameCtr.setEnemyShips(enemyShipsLocation);
-//
-//                for (String x : gameCtr.getEnemyShips()) {
-//                    System.out.print(x);
-//                }
-//
-//                break;
-//            case ObjectWrapper.SERVER_RANDOM_NOT_TURN:
-//                gameCtr.setPlayerTurn(false);
-//                break;
-//            case ObjectWrapper.SERVER_RANDOM_TURN:
-//                gameCtr.setPlayerTurn(true);
-//                break;
-//            case ObjectWrapper.SERVER_START_PLAY_GAME:
-//                PlayFrm playFrm = new PlayFrm(gameCtr);
-//                gameCtr.setPlayFrm(playFrm);
-//
-//                gameCtr.getPlayFrm().setVisible(true);
-//                this.dispose();
-//                break;
-//
-//        }
-//    }
+    public void receivedDataProcessing(ObjectWrapper data) {
+        switch (data.getPerformative()) {
+            case ObjectWrapper.SERVER_SEND_RESULT:
+                String[] resultAndUserNameEnemy = ((String) data.getData()).split("\\|\\|");
+
+                String result = resultAndUserNameEnemy[0];
+                String usernameEnemy = resultAndUserNameEnemy[1];
+
+                lblPlayer.setText(gameCtr.getMySocket().getUsername());
+                lblNamePlayer.setText(gameCtr.getMySocket().getUsername());
+                lblNameEnemy.setText(usernameEnemy);
+
+                if (result.equals("win")) {
+                    lblResult.setText("BẠN ĐÃ CHIẾN THẮNG");
+                    lblPlayerPoint.setText("+1");
+                    lblEnemyPoint.setText("Không đổi");
+                } else if (result.equals("loss")) {
+                    lblResult.setText("BẠN ĐÃ THUA CUỘC");
+                    lblEnemyPoint.setText("+1");
+                    lblPlayerPoint.setText("Không đổi");
+                } else if (result.equals("cancelled")) {
+                    lblResult.setText("ĐỐI THỦ CỦA BẠN ĐÃ RỜI ĐI");
+                    lblEnemyPoint.setText("-1");
+                    lblPlayerPoint.setText("Không đổi");
+                }
+                break;
+        }
+    }
 }
