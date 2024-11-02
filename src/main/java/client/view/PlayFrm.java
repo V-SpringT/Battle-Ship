@@ -85,6 +85,7 @@ public class PlayFrm extends javax.swing.JFrame {
         });
 
         lblEnemyWaiting.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblEnemyWaiting.setForeground(new java.awt.Color(255, 51, 0));
         lblEnemyWaiting.setText("Your enemy turn !");
 
         lblPlayer.setText("name player");
@@ -95,6 +96,7 @@ public class PlayFrm extends javax.swing.JFrame {
         lblTime.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
 
         lblWaiting.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblWaiting.setForeground(new java.awt.Color(0, 153, 0));
         lblWaiting.setText("Your turn !");
 
         jScrollPane1.setAutoscrolls(true);

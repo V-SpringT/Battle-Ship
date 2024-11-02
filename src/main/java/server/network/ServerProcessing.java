@@ -89,10 +89,9 @@ public class ServerProcessing extends Thread {
                                 if (sp.getUsername().equals(username1) && !sp.inGame) {
                                     canSend = true;
                                     System.out.println(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
-                                    enemy = sp;
-                                    enemy.enemy = this;
+                                    sp.enemy = this;
                                     System.out.println("Enemy before send play request: " + enemy);
-                                    enemy.sendData(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
+                                    sp.sendData(new ObjectWrapper(ObjectWrapper.RECEIVE_PLAY_REQUEST, this.username));
                                     break;
                                 }
                             }
@@ -105,8 +104,9 @@ public class ServerProcessing extends Thread {
                             break;
                         case ObjectWrapper.ACCEPTED_PLAY_REQUEST:
                             if (!enemy.inGame && enemy.isOnline) {
+                                enemy.enemy = this;
                                 inGame = true;
-                                enemy.inGame = true;
+                                enemy.inGame = true;                              
                                 enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
                                 gameCtr = new GameCtr();
@@ -119,7 +119,7 @@ public class ServerProcessing extends Thread {
                             }
                             break;
                         case ObjectWrapper.REJECTED_PLAY_REQUEST:
-                            // ?
+                            enemy = null;
                             break;
                         case ObjectWrapper.READY_PLAY_GAME: // data là arraylist vị trí các tàu dạng: / 32 33 / 42 43 44...
                             stopAllTimers();
