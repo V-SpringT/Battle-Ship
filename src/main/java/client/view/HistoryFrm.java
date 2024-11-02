@@ -1,6 +1,7 @@
 package client.view;
 
 import client.controller.ClientCtr;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import shared.dto.ObjectWrapper;
@@ -282,13 +283,16 @@ public class HistoryFrm extends javax.swing.JFrame {
                 String[] columnNames = {"STT", "Đối thủ", "Thời gian", "Kết quả", "Điểm thay đổi"};
                 DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
+                // Tạo formatter theo định dạng dd/MM/yyyy HH:mm:ss
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
                 List<Match> listMatch = playerHistory.getListMatch();
                 int index = 1;
                 for (Match match : listMatch) {
                     Object[] rowData = {
                         index++,
                         match.getUser2Username(),
-                        match.getTimestamp().toString(),
+                        match.getTimestamp().format(formatter), // Định dạng timestamp
                         match.getResultUser1(),
                         match.getPointsChangeUser1()
                     };

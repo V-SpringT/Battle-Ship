@@ -1,7 +1,7 @@
 package client.view;
 
-import client.controller.GameCtr;
-import client.helper.CountDownTimer;
+import client.controller.ClientCtr;
+import server.helper.CountDownTimer;
 import client.helper.ShipDrawer;
 import client.helper.ShipGenerator;
 import java.awt.event.ActionEvent;
@@ -20,7 +20,7 @@ import shared.dto.ObjectWrapper;
 
 public class SetShipFrm extends javax.swing.JFrame {
 
-    private GameCtr gameCtr;
+    private ClientCtr mySocket;
 
     private HashMap<String, JToggleButton> buttonIndex = new HashMap<>();
     private ArrayList<String> shipsLocation = new ArrayList<>();
@@ -30,15 +30,17 @@ public class SetShipFrm extends javax.swing.JFrame {
     private int shipSize; //Kích thước tàu hiện tại được chọn để sắp
     private int shipIndexList; //Vị trí tàu được chọn (trong list) hiện tại trong danh sách tàu
     private boolean horizontal = true;
+    
+    private boolean playerTurn = false;
 
     private CountDownTimer timeTask;
     private Timer timer;
 
-    public SetShipFrm(GameCtr gameController) {
-        gameCtr = gameController;
+    public SetShipFrm(ClientCtr clientCtr) {
+        mySocket = clientCtr;
         initComponents();
 
-        lblPlayer.setText(gameCtr.getMySocket().getUsername());
+        lblPlayer.setText(mySocket.getUsername());
 
         setGrid();
         initiateShips();
@@ -166,7 +168,7 @@ public class SetShipFrm extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnRandom)
                         .addGap(18, 18, 18)
-                        .addComponent(btnExit)
+                        .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(38, 38, 38)
                         .addComponent(btnHori)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -212,11 +214,11 @@ public class SetShipFrm extends javax.swing.JFrame {
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         int k = JOptionPane.showConfirmDialog(this, "Bạn có thật sự muốn thoát trận đấu ? Điều này sẽ khiến bạn bị trừ điểm", "Thoát", JOptionPane.YES_NO_OPTION);
         if (k == 0) {
-            timeTask.cancel();
+//            timeTask.cancel();
             timer.cancel();
-            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_SET_SHIP));
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_SET_SHIP));
 
-            gameCtr.getMySocket().getMainFrm().setVisible(true);
+            mySocket.getMainFrm().setVisible(true);
             this.dispose();
         }
     }//GEN-LAST:event_btnExitActionPerformed
@@ -395,7 +397,7 @@ public class SetShipFrm extends javax.swing.JFrame {
     }
 
     private void setCountDownTime() {
-        timeTask = new CountDownTimer(17);
+        timeTask = new CountDownTimer(21);
         timer = new Timer();
         timer.scheduleAtFixedRate(timeTask, 0, 1000);
 
@@ -410,8 +412,6 @@ public class SetShipFrm extends javax.swing.JFrame {
             // Kiểm tra khi hết giờ và xử lý trực tiếp trong form
             if (timeRemaining <= 0) {
                 ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer
-                random();
-                ready();
             }
         }).start();
 
@@ -419,16 +419,13 @@ public class SetShipFrm extends javax.swing.JFrame {
 
     private void ready() {
         if (shipListModel.getSize() == 0) {
-            timeTask.cancel();
+//            timeTask.cancel();
             timer.cancel();
 
             ObjectWrapper objectWrapper = new ObjectWrapper(ObjectWrapper.READY_PLAY_GAME, shipsLocation);
-            gameCtr.getMySocket().sendData(objectWrapper);
+            mySocket.sendData(objectWrapper);
 
             lblWaiting.setVisible(true);
-
-            // set ship location in game control ?
-            gameCtr.setPlayerShips(new ArrayList<>(shipsLocation));
         } else {
             JOptionPane.showMessageDialog(this, "Hãy đặt tất cả tàu");
         }
@@ -436,36 +433,32 @@ public class SetShipFrm extends javax.swing.JFrame {
 
     public void receivedDataProcessing(ObjectWrapper data) {
         switch (data.getPerformative()) {
-            case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
-                ArrayList<String> enemyShipsLocation = (ArrayList<String>) data.getData();
-                gameCtr.setEnemyShips(enemyShipsLocation);
-
-                for (String x : gameCtr.getEnemyShips()) {
-                    System.out.print(x);
-                }
-
-                break;
             case ObjectWrapper.SERVER_RANDOM_NOT_TURN:
-                gameCtr.setPlayerTurn(false);
+                playerTurn = false;
                 break;
             case ObjectWrapper.SERVER_RANDOM_TURN:
-                gameCtr.setPlayerTurn(true);
+                playerTurn = true;
+                break;
+            case ObjectWrapper.SERVER_REQUEST_READY_GAME:
+                System.out.println("Frm: Người này chưa xếp xong");
+                random();
+                ready();
                 break;
             case ObjectWrapper.SERVER_START_PLAY_GAME:
-                PlayFrm playFrm = new PlayFrm(gameCtr);
-                gameCtr.setPlayFrm(playFrm);
+                PlayFrm playFrm = new PlayFrm(mySocket, playerTurn, shipsLocation);
+                mySocket.setPlayFrm(playFrm);
 
-                gameCtr.getPlayFrm().setVisible(true);
+                mySocket.getPlayFrm().setVisible(true);
                 this.dispose();
                 break;
             case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_SET_SHIP:
-                timeTask.cancel();
+//                timeTask.cancel();
                 timer.cancel();
                 JOptionPane.showMessageDialog(this, "Đối thủ của bạn đã rời đi, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-                ResultFrm resultFrm = new ResultFrm(gameCtr);
-                gameCtr.setResultFrm(resultFrm);
+                ResultFrm resultFrm = new ResultFrm(mySocket);
+                mySocket.setResultFrm(resultFrm);
 
-                gameCtr.getResultFrm().setVisible(true);
+                mySocket.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
 

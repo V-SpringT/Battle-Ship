@@ -38,28 +38,6 @@ public class ObjectWrapper implements Serializable {
     // ?
     public static final int SERVER_REJECTED_PLAY_REQUEST = 12;
 
-    // client gửi request sẵn sàng (đã xếp tàu xong), kèm data chính là arraylist string vị trí các tàu
-    public static final int READY_PLAY_GAME = 13;
-
-    // server nhận được danh sách tàu của 1 client thì gửi cho client kia để nó lưu
-    public static final int SERVER_TRANSFER_POSITION_ENEMY_SHIP = 14;
-
-    // server random chọn 1 trong 2 đi trước sau giai đoạn xếp tàu
-    public static final int SERVER_RANDOM_TURN = 15;
-    public static final int SERVER_RANDOM_NOT_TURN = 16;
-
-    // server kiểm soát lượt trong lúc bắn
-    public static final int SERVER_CHOOSE_TURN = 17;
-    public static final int SERVER_CHOOSE_NOT_TURN = 18;
-
-    // cả 2 được xác định đã sẵn sàng , server gửi cho cả 2 bắt đầu game
-    public static final int SERVER_START_PLAY_GAME = 19;
-
-    // client 1 được xác định bắn hụt, gửi kèm string location
-    public static final int SHOOT_FAILTURE = 20;
-    // server gửi bắn hụt đến enemy để vẽ, kèm string location
-    public static final int SERVER_TRANSFER_SHOOT_FAILTURE = 21;
-
     // client gửi request này tức logout ở mainfrm
     public static final int EXIT_MAIN_FORM = 22;
 
@@ -69,24 +47,39 @@ public class ObjectWrapper implements Serializable {
     // client yêu cầu cập nhật lại danh sách client rảnh
     public static final int UPDATE_WAITING_LIST_REQUEST = 24;
 
-    // client 1 được xác định bắn trúng 1 điểm, gửi kèm string location
-    public static final int SHOOT_HIT_POINT = 25;
-    // server gửi bắn trúng 1 điểm đến enemy để vẽ, kèm string location
+    public static final int GET_HISTORY = 40;
+    public static final int GET_RANKING = 41;
+    public static final int SERVER_SEND_HISTORY = 42;
+    public static final int SERVER_SEND_RANKING = 43;
+
+    // client gửi request sẵn sàng (đã xếp tàu xong), kèm data chính là arraylist string vị trí các tàu
+    public static final int READY_PLAY_GAME = 13;
+    
+    // Đếm thời gian cho xếp tàu trên server nhận ra đã hết, server gửi cho client cái này để cưỡng chế ready (bắt random => ready)
+    public static final int SERVER_REQUEST_READY_GAME = 14;
+
+    // server random chọn 1 trong 2 đi trước sau giai đoạn xếp tàu
+    public static final int SERVER_RANDOM_TURN = 15;
+    public static final int SERVER_RANDOM_NOT_TURN = 16;
+
+    // cả 2 được xác định đã sẵn sàng , server gửi cho cả 2 bắt đầu game
+    public static final int SERVER_START_PLAY_GAME = 19;
+
+    // Gửi toạ độ bắn tàu lên
+    public static final int SHOOT_REQUEST = 20;
+    // server gửi bắn hụt đến cả 2 để vẽ, kèm string location
+    public static final int SERVER_TRANSFER_SHOOT_FAILTURE = 21;
+
+    // server gửi bắn trúng 1 điểm đến cả 2 để vẽ, kèm string location
     public static final int SERVER_TRANSFER_SHOOT_HIT_POINT = 26;
 
-    // client 1 được xác định bắn trúng và phá huỷ 1 con tàu, gửi kèm list string location tàu đó
-    public static final int SHOOT_HIT_SHIP = 27;
-    // server gửi bắn trúng và phá huỷ 1 con tàu cho enemy để vẽ, gửi kèm list string location tàu đó
+    // server gửi bắn trúng và phá huỷ 1 con tàu đến cả 2 để vẽ, gửi kèm list string location tàu đó
     public static final int SERVER_TRANSFER_SHOOT_HIT_SHIP = 28;
 
-    // client 1 được xác định bắn trúng, phá huỷ 1 con tàu và thắng, gửi kèm list string location tàu đó
-    public static final int SHOOT_HIT_WIN = 29;
-    // server gửi bắn trúng và phá huỷ 1 con tàu cho enemy để vẽ, gửi kèm list string location tàu đó, kết quả thua
-    public static final int SERVER_TRANSFER_LOSE = 30;
+    // server gửi bắn trúng và phá huỷ 1 con tàu đến cả 2 để vẽ, gửi kèm list string location tàu đó, kết thúc game
+    public static final int SERVER_TRANSFER_END_GAME = 30;
 
-    // client 1 được xác định hết thời gian mà không bắn, mất lượt
-    public static final int SHOOT_MISS_TURN = 31;
-    // server gửi mất lượt về cho client kia
+    // server gửi thông tin mất lượt (không bắn khi đến lượt) về cho cả 2
     public static final int SERVER_TRANSFER_SHOOT_MISS_TURN = 32;
 
     // server gửi kết quả hiển thị cho result form
@@ -103,14 +96,9 @@ public class ObjectWrapper implements Serializable {
     public static final int QUIT_WHEN_PLAY = 37;
     // server gửi mất lượt về cho client kia
     public static final int SERVER_TRANSFER_QUIT_WHEN_PLAY = 38;
-    
+
     // xem kết quả xong ra trang chủ
     public static final int BACK_TO_MAIN_FORM = 39;
-    
-    public static final int GET_HISTORY = 40;
-    public static final int GET_RANKING = 41;
-    public static final int SERVER_SEND_HISTORY = 42;
-    public static final int SERVER_SEND_RANKING = 43;
 
     private int performative;
     private Object data;

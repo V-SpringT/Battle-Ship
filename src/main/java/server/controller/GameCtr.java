@@ -1,8 +1,4 @@
-package client.controller;
-
-import client.view.PlayFrm;
-import client.view.ResultFrm;
-import client.view.SetShipFrm;
+package server.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,53 +9,33 @@ import java.util.Set;
 
 public class GameCtr {
 
-    private ClientCtr mySocket;
-
     private ArrayList<String> playerShips;
     private ArrayList<String> enemyShips;
     private boolean playerTurn = true;
+    private boolean setup = false; // đặt tàu xong
+    private boolean shot = false;  // bắn xong trong lượt
 
     // Thêm các biến để theo dõi trạng thái tàu
     private Map<String, Set<String>> shipGroups = new HashMap<>(); // Map để lưu các nhóm tàu
     private Set<String> hitPositions = new HashSet<>();  // Set lưu các vị trí đã bắn trúng
 
-    private SetShipFrm setShipFrm;
-    private PlayFrm playFrm;
-    private ResultFrm resultFrm;
-
     public GameCtr() {
     }
 
-    public SetShipFrm getSetShipFrm() {
-        return setShipFrm;
+    public boolean isShot() {
+        return shot;
     }
 
-    public void setSetShipFrm(SetShipFrm setShipFrm) {
-        this.setShipFrm = setShipFrm;
+    public void setShot(boolean shot) {
+        this.shot = shot;
     }
 
-    public PlayFrm getPlayFrm() {
-        return playFrm;
+    public boolean isSetup() {
+        return setup;
     }
 
-    public void setPlayFrm(PlayFrm playFrm) {
-        this.playFrm = playFrm;
-    }
-
-    public ResultFrm getResultFrm() {
-        return resultFrm;
-    }
-
-    public void setResultFrm(ResultFrm resultFrm) {
-        this.resultFrm = resultFrm;
-    }
-
-    public GameCtr(ClientCtr mySocket) {
-        this.mySocket = mySocket;
-    }
-
-    public ClientCtr getMySocket() {
-        return mySocket;
+    public void setSetup(boolean setup) {
+        this.setup = setup;
     }
 
     public ArrayList<String> getPlayerShips() {

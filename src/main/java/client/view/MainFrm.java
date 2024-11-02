@@ -1,7 +1,6 @@
 package client.view;
 
 import client.controller.ClientCtr;
-import client.controller.GameCtr;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.DefaultListModel;
@@ -222,12 +221,10 @@ public class MainFrm extends javax.swing.JFrame {
                 }
                 break;
             case ObjectWrapper.SERVER_SET_GAME_READY:
-                GameCtr gameCtr = new GameCtr(mySocket);
-                mySocket.setGameCtr(gameCtr);
-                SetShipFrm setShipFrm = new SetShipFrm(gameCtr);
-                gameCtr.setSetShipFrm(setShipFrm);
+                SetShipFrm setShipFrm = new SetShipFrm(mySocket);
+                mySocket.setSetShipFrm(setShipFrm);
 
-                gameCtr.getSetShipFrm().setVisible(true);
+                mySocket.getSetShipFrm().setVisible(true);
                 this.dispose();
                 break;
         }

@@ -1,14 +1,14 @@
 package client.view;
 
-import client.controller.GameCtr;
+import client.controller.ClientCtr;
 import shared.dto.ObjectWrapper;
 
 public class ResultFrm extends javax.swing.JFrame {
 
-    private GameCtr gameCtr;
+    private ClientCtr mySocket;
 
-    public ResultFrm(GameCtr gameController) {
-        gameCtr = gameController;
+    public ResultFrm(ClientCtr clientCtr) {
+        mySocket = clientCtr;
         initComponents();
         setLocationRelativeTo(null);
     }
@@ -17,7 +17,7 @@ public class ResultFrm extends javax.swing.JFrame {
     public void setVisible(boolean visible) {
         if (visible) {
             System.out.println("In result form: ");
-            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
         }
         super.setVisible(visible);
     }
@@ -147,9 +147,9 @@ public class ResultFrm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.BACK_TO_MAIN_FORM));
+        mySocket.sendData(new ObjectWrapper(ObjectWrapper.BACK_TO_MAIN_FORM));
 
-        gameCtr.getMySocket().getMainFrm().setVisible(true);
+        mySocket.getMainFrm().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
@@ -176,8 +176,8 @@ public class ResultFrm extends javax.swing.JFrame {
                 String result = resultAndUserNameEnemy[0];
                 String usernameEnemy = resultAndUserNameEnemy[1];
 
-                lblPlayer.setText(gameCtr.getMySocket().getUsername());
-                lblNamePlayer.setText(gameCtr.getMySocket().getUsername());
+                lblPlayer.setText(mySocket.getUsername());
+                lblNamePlayer.setText(mySocket.getUsername());
                 lblNameEnemy.setText(usernameEnemy);
 
                 if (result.equals("win")) {

@@ -39,59 +39,54 @@ public class ClientListening extends Thread {
                                     clientCtr.getMainFrm().receivedDataProcessing(data);
                                 }
                                 break;
+                            case ObjectWrapper.SERVER_SEND_HISTORY:
+                                clientCtr.getHistoryFrm().receivedDataProcessing(data);
+                                break;
+                            case ObjectWrapper.SERVER_SEND_RANKING:
+                                clientCtr.getRankingFrm().receivedDataProcessing(data);
+                                break;
                             case ObjectWrapper.RECEIVE_PLAY_REQUEST:
                                 clientCtr.getMainFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_SET_GAME_READY:
                                 clientCtr.getMainFrm().receivedDataProcessing(data);
                                 break;
-                            case ObjectWrapper.SERVER_TRANSFER_POSITION_ENEMY_SHIP:
-                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                            case ObjectWrapper.SERVER_REQUEST_READY_GAME:
+                                System.out.println("Client: Có ai đó chưa xếp xong");
+                                clientCtr.getSetShipFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_RANDOM_NOT_TURN:
-                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                clientCtr.getSetShipFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_RANDOM_TURN:
-                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                clientCtr.getSetShipFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_START_PLAY_GAME:
-                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                clientCtr.getSetShipFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
-                                break;
-                            case ObjectWrapper.SERVER_CHOOSE_NOT_TURN:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
-                                break;
-                            case ObjectWrapper.SERVER_CHOOSE_TURN:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
-                            case ObjectWrapper.SERVER_TRANSFER_LOSE:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
+                            case ObjectWrapper.SERVER_TRANSFER_END_GAME:
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_SEND_RESULT:
-                                clientCtr.getGameCtr().getResultFrm().receivedDataProcessing(data);
+                                clientCtr.getResultFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_SET_SHIP:
-                                clientCtr.getGameCtr().getSetShipFrm().receivedDataProcessing(data);
+                                clientCtr.getSetShipFrm().receivedDataProcessing(data);
                                 break;
                             case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY:
-                                clientCtr.getGameCtr().getPlayFrm().receivedDataProcessing(data);
-                                break;
-                            case ObjectWrapper.SERVER_SEND_HISTORY:
-                                clientCtr.getHistoryFrm().receivedDataProcessing(data);
-                                break;
-                            case ObjectWrapper.SERVER_SEND_RANKING:
-                                clientCtr.getRankingFrm().receivedDataProcessing(data);
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
                         }
 

@@ -8,7 +8,10 @@ import client.view.ConnectFrm;
 import client.view.HistoryFrm;
 import client.view.LoginFrm;
 import client.view.MainFrm;
+import client.view.PlayFrm;
 import client.view.RankingFrm;
+import client.view.ResultFrm;
+import client.view.SetShipFrm;
 
 import shared.dto.IPAddress;
 
@@ -29,10 +32,11 @@ public class ClientCtr {
     private ConnectFrm connectFrm;
     private LoginFrm loginFrm;
     private MainFrm mainFrm;
+    private SetShipFrm setShipFrm;
+    private PlayFrm playFrm;
+    private ResultFrm resultFrm;
     private HistoryFrm historyFrm;
     private RankingFrm rankingFrm;
-
-    private GameCtr gameCtr;
 
     public ClientCtr(ConnectFrm connectFrm) throws IOException {
         this.connectFrm = connectFrm;
@@ -121,14 +125,6 @@ public class ClientCtr {
         return username;
     }
 
-    public GameCtr getGameCtr() {
-        return gameCtr;
-    }
-
-    public void setGameCtr(GameCtr gameCtr) {
-        this.gameCtr = gameCtr;
-    }
-
     public HistoryFrm getHistoryFrm() {
         return historyFrm;
     }
@@ -143,6 +139,30 @@ public class ClientCtr {
 
     public void setRankingFrm(RankingFrm rankingFrm) {
         this.rankingFrm = rankingFrm;
+    }
+
+    public SetShipFrm getSetShipFrm() {
+        return setShipFrm;
+    }
+
+    public void setSetShipFrm(SetShipFrm setShipFrm) {
+        this.setShipFrm = setShipFrm;
+    }
+
+    public PlayFrm getPlayFrm() {
+        return playFrm;
+    }
+
+    public void setPlayFrm(PlayFrm playFrm) {
+        this.playFrm = playFrm;
+    }
+
+    public ResultFrm getResultFrm() {
+        return resultFrm;
+    }
+
+    public void setResultFrm(ResultFrm resultFrm) {
+        this.resultFrm = resultFrm;
     }
 
 }

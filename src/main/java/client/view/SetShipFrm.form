@@ -76,7 +76,7 @@
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="btnRandom" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="btnExit" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnExit" min="-2" pref="23" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
                       <Component id="btnHori" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>

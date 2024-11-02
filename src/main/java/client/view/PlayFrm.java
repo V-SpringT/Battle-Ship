@@ -1,7 +1,7 @@
 package client.view;
 
-import client.controller.GameCtr;
-import client.helper.CountDownTimer;
+import client.controller.ClientCtr;
+import server.helper.CountDownTimer;
 import client.helper.ShipDrawer;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -12,36 +12,46 @@ import java.util.Timer;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 import shared.dto.ObjectWrapper;
 
 public class PlayFrm extends javax.swing.JFrame {
 
-    private GameCtr gameCtr;
+    private ClientCtr mySocket;
+    private boolean playerTurn = false;
+    private ArrayList<String> shipsLocation = new ArrayList<>();
 
     private HashMap<String, JToggleButton> buttonIndex = new HashMap<>();
     private HashMap<String, JToggleButton> buttonEnemyIndex = new HashMap<>();
+    private ShipDrawer drawerBtn;
+    private ShipDrawer drawerBtnEnemy;
 
     private HashSet<JToggleButton> buttonEnemyShooted = new HashSet<>(); // Lưu các nút đã bị bắn
 
     private CountDownTimer timeTask;
     private Timer timer;
 
-    public PlayFrm(GameCtr gameController) {
-        gameCtr = gameController;
+    public PlayFrm(ClientCtr clientCtr, boolean isPlayerTurn, ArrayList<String> locations) {
+        mySocket = clientCtr;
+        playerTurn = isPlayerTurn;
+        shipsLocation = locations;
+
         initComponents();
 
-        lblPlayer.setText(gameCtr.getMySocket().getUsername());
+        DefaultCaret caret = (DefaultCaret) txtLog.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        lblPlayer.setText(mySocket.getUsername());
 
         setGrid();
         SwingUtilities.invokeLater(this::drawMyShips);
 
-        if (gameCtr.isPlayerTurn()) {
+        if (playerTurn) {
             startPlayerTurn();
         } else {
             startEnemyTurn();
         }
 
-        setCountDownTime(17);
+//        setCountDownTime(17);
         setLocationRelativeTo(null);
     }
 
@@ -162,11 +172,11 @@ public class PlayFrm extends javax.swing.JFrame {
     private void btnQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitActionPerformed
         int k = JOptionPane.showConfirmDialog(this, "Bạn có thật sự muốn thoát trận đấu ? Điều này sẽ khiến bạn bị trừ điểm", "Thoát", JOptionPane.YES_NO_OPTION);
         if (k == 0) {
-            timeTask.cancel();
+//            timeTask.cancel();
             timer.cancel();
-            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_PLAY));
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.QUIT_WHEN_PLAY));
 
-            gameCtr.getMySocket().getMainFrm().setVisible(true);
+            mySocket.getMainFrm().setVisible(true);
             this.dispose();
         }
     }//GEN-LAST:event_btnQuitActionPerformed
@@ -215,16 +225,17 @@ public class PlayFrm extends javax.swing.JFrame {
             }
             row++;
         }
+        drawerBtn = new ShipDrawer(buttonIndex);
+        drawerBtnEnemy = new ShipDrawer(buttonEnemyIndex);
     }
 
     private void drawMyShips() {
-        ShipDrawer drawer = new ShipDrawer(buttonIndex);
         List<String> currentShip = new ArrayList<>();
 
-        for (String loc : gameCtr.getPlayerShips()) {
+        for (String loc : shipsLocation) {
             if (loc.equals("/")) {
                 if (!currentShip.isEmpty()) {
-                    drawer.drawCompleteShip(currentShip);
+                    drawerBtn.drawCompleteShip(currentShip);
                     currentShip = new ArrayList<>();
                 }
                 currentShip = new ArrayList<>();
@@ -234,7 +245,7 @@ public class PlayFrm extends javax.swing.JFrame {
         }
         // Vẽ con tàu cuối cùng nếu có
         if (!currentShip.isEmpty()) {
-            drawer.drawCompleteShip(currentShip);
+            drawerBtn.drawCompleteShip(currentShip);
         }
     }
 
@@ -243,44 +254,10 @@ public class PlayFrm extends javax.swing.JFrame {
         button.setSelected(false);
 
         String location = button.getName();
-        Object[] result = gameCtr.handleShot(location);
-        ShipDrawer drawer = new ShipDrawer(buttonEnemyIndex);
         buttonEnemyShooted.add(button);
 
-        // dừng time khi bắn
-        timeTask.cancel();
         timer.cancel();
-
-        if ((int) result[0] == 0) {
-            drawer.drawMiss(location);
-            txtLog.append("Bạn đã bắn hụt\n");
-            gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_FAILTURE, location));
-        } else {
-            if (result[1] != null) {
-                String[] destroyedShip = (String[]) result[1];
-                drawer.drawDestroyedShip(destroyedShip);
-                if (!(boolean) result[2]) {
-                    txtLog.append("Bạn đã phá huỷ 1 con tàu\n");
-                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_SHIP, destroyedShip));
-                } else {
-                    txtLog.append("Bạn đã chiến thắng\n");
-                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_WIN, destroyedShip));
-                    timeTask.cancel();
-                    timer.cancel();
-                    JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-//                    gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.GET_RESULT));
-                    ResultFrm resultFrm = new ResultFrm(gameCtr);
-                    gameCtr.setResultFrm(resultFrm);
-
-                    gameCtr.getResultFrm().setVisible(true);
-                    this.dispose();
-                }
-            } else {
-                drawer.drawHit(location);
-                txtLog.append("Bạn đã bắn trúng 1 con tàu\n");
-                gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_HIT_POINT, location));
-            }
-        }
+        mySocket.sendData(new ObjectWrapper(ObjectWrapper.SHOOT_REQUEST, location));
     }
 
     private void setCountDownTime(int timeRemain) {
@@ -298,17 +275,7 @@ public class PlayFrm extends javax.swing.JFrame {
 
             // Kiểm tra khi hết giờ và xử lý trực tiếp trong form
             if (timeRemaining <= 0) {
-                ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer
-                if (gameCtr.isPlayerTurn()) {
-                    String allText = txtLog.getText();
-                    String[] lines = allText.split("\n");
-                    String lastLine = lines[lines.length - 1];
-
-                    if (!lastLine.contains("Bạn bị mất lượt")) {
-                        txtLog.append("Bạn bị mất lượt\n");
-                        gameCtr.getMySocket().sendData(new ObjectWrapper(ObjectWrapper.SHOOT_MISS_TURN));
-                    }
-                }
+                ((javax.swing.Timer) e.getSource()).stop(); // Dừng Swing Timer              
             }
         }).start();
 
@@ -329,7 +296,7 @@ public class PlayFrm extends javax.swing.JFrame {
         lblEnemyWaiting.setVisible(false);
         lblWaiting.setVisible(true);
         setCountDownTime(16);
-        gameCtr.setPlayerTurn(true);
+        playerTurn = true;
     }
 
     // Khi kết thúc lượt của người chơi, vô hiệu hóa lưới
@@ -338,56 +305,80 @@ public class PlayFrm extends javax.swing.JFrame {
         lblEnemyWaiting.setVisible(true);
         lblWaiting.setVisible(false);
         setCountDownTime(16);
-        gameCtr.setPlayerTurn(false);
+        playerTurn = false;
     }
 
     public void receivedDataProcessing(ObjectWrapper data) {
         switch (data.getPerformative()) {
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE:
-                ShipDrawer drawer = new ShipDrawer(buttonIndex);
-                drawer.drawMiss((String) data.getData());
-                txtLog.append("Đối thủ của bạn đã bắn hụt\n");
-                break;
-            case ObjectWrapper.SERVER_CHOOSE_TURN:
-                startPlayerTurn();
-                break;
-            case ObjectWrapper.SERVER_CHOOSE_NOT_TURN:
-                startEnemyTurn();
+                if (playerTurn) {
+                    drawerBtnEnemy.drawMiss((String) data.getData());
+                    txtLog.append("Bạn đã bắn hụt\n");
+                    startEnemyTurn();
+                } else {
+                    drawerBtn.drawMiss((String) data.getData());
+                    txtLog.append("Đối thủ của bạn đã bắn hụt\n");
+                    startPlayerTurn();
+                }
                 break;
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT:
-                ShipDrawer drawer1 = new ShipDrawer(buttonIndex);
-                drawer1.drawHit((String) data.getData());
-                txtLog.append("Đối thủ của bạn đã bắn trúng tàu\n");
+                if (playerTurn) {
+                    drawerBtnEnemy.drawHit((String) data.getData());
+                    txtLog.append("Bạn đã bắn trúng 1 con tàu\n");
+                    startPlayerTurn();
+                } else {
+                    drawerBtn.drawHit((String) data.getData());
+                    txtLog.append("Đối thủ của bạn đã bắn trúng tàu\n");
+                    startEnemyTurn();
+                }
                 break;
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP:
-                ShipDrawer drawer2 = new ShipDrawer(buttonIndex);
-                drawer2.drawDestroyedShip((String[]) data.getData());
-                txtLog.append("Đối thủ của bạn đã phá huỷ 1 con tàu\n");
+                String[] ship = (String[]) data.getData();
+                if (playerTurn) {
+                    drawerBtnEnemy.drawDestroyedShip(ship);
+                    txtLog.append("Bạn đã phá huỷ 1 con tàu " + ship.length + " ô\n");
+                    startPlayerTurn();
+                } else {
+                    drawerBtn.drawDestroyedShip(ship);
+                    txtLog.append("Đối thủ của bạn đã phá huỷ 1 con tàu " + ship.length + " ô\n");
+                    startEnemyTurn();
+                }
                 break;
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN:
-                txtLog.append("Đối thủ của bạn bị mất lượt\n");
+                if (playerTurn) {
+                    txtLog.append("Bạn bị mất lượt\n");
+                    startEnemyTurn();
+                } else {
+                    txtLog.append("Đối thủ của bạn bị mất lượt\n");
+                    startPlayerTurn();
+                }
                 break;
-            case ObjectWrapper.SERVER_TRANSFER_LOSE:
-                ShipDrawer drawer4 = new ShipDrawer(buttonIndex);
-                drawer4.drawDestroyedShip((String[]) data.getData());
-                txtLog.append("Bạn đã thua cuộc\n");
-                timeTask.cancel();
-                timer.cancel();
-                JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-                ResultFrm resultFrm = new ResultFrm(gameCtr);
-                gameCtr.setResultFrm(resultFrm);
+            case ObjectWrapper.SERVER_TRANSFER_END_GAME:
+                if (playerTurn) {
+                    drawerBtnEnemy.drawDestroyedShip((String[]) data.getData());
+                    txtLog.append("Bạn đã chiến thắng\n");
+                    timer.cancel();
+                } else {
+                    drawerBtn.drawDestroyedShip((String[]) data.getData());
+                    txtLog.append("Bạn đã thua cuộc\n");
+                    timer.cancel();
+                }
 
-                gameCtr.getResultFrm().setVisible(true);
+                JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                ResultFrm resultFrm = new ResultFrm(mySocket);
+                mySocket.setResultFrm(resultFrm);
+
+                mySocket.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
             case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY:
-                timeTask.cancel();
+//                timeTask.cancel();
                 timer.cancel();
                 JOptionPane.showMessageDialog(this, "Đối thủ của bạn đã rời đi, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
-                ResultFrm resultFrm1 = new ResultFrm(gameCtr);
-                gameCtr.setResultFrm(resultFrm1);
+                ResultFrm resultFrm1 = new ResultFrm(mySocket);
+                mySocket.setResultFrm(resultFrm1);
 
-                gameCtr.getResultFrm().setVisible(true);
+                mySocket.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
         }
