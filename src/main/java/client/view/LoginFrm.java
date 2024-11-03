@@ -160,7 +160,6 @@ public class LoginFrm extends javax.swing.JFrame {
             this.dispose();
         }
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreateAcc;
     private javax.swing.JButton btnLogin;
