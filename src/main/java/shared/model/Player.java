@@ -10,15 +10,28 @@ public class Player implements Serializable {
     private int totalWins;
     private int totalLosses;
     private int totalAfk;
-
+    private int totalDraw;
     public Player() {
         super();
+        this.points = 0;
+        this.totalWins=0;
+        this.totalLosses=0;
+        this.totalAfk=0;
+        this.totalDraw=0;
     }
-
+    
     public Player(String username, String password) {
         super();
         this.username = username;
         this.password = password;
+    }
+
+    public int getTotalDraw() {
+        return totalDraw;
+    }
+
+    public void setTotalDraw(int totalDraw) {
+        this.totalDraw = totalDraw;
     }
 
     public String getUsername() {

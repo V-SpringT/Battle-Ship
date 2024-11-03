@@ -6,12 +6,12 @@ go
 
 CREATE TABLE players (
     username NVARCHAR(50) PRIMARY KEY,
-	password NVARCHAR(50),
+    password NVARCHAR(50),
     points INT DEFAULT 0,
     total_wins INT DEFAULT 0,
     total_losses INT DEFAULT 0,
     total_afk INT DEFAULT 0,
-	total_draw INT DEFAULT 0
+    total_draw INT DEFAULT 0
 );
 go
 

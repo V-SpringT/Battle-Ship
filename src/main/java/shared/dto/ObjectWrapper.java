@@ -3,7 +3,6 @@ package shared.dto;
 import java.io.Serializable;
 
 public class ObjectWrapper implements Serializable {
-
     // client gửi request login
     public static final int LOGIN_USER = 1;
 
@@ -102,7 +101,10 @@ public class ObjectWrapper implements Serializable {
 
     // xem kết quả xong ra trang chủ
     public static final int BACK_TO_MAIN_FORM = 39;
-
+    
+    public static final int REGISTER_USER = 50;
+    public static final int REGISTER_SUCCESSFUL =51;
+    public static final int SERVER_REGISTER_USER=52;
     private int performative;
     private Object data;
 

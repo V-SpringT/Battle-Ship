@@ -13,7 +13,42 @@ public class PlayerDAO extends DAO {
     public PlayerDAO() {
         super();
     }
+    
+    public void CreateAccount(Player player){
+        String sql = "INSERT INTO players (username, password, points, total_wins, total_losses, total_afk, total_draw) VALUES(?,?,?,?,?,?,?)";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, player.getUsername());
+            ps.setString(2, player.getPassword());
+            ps.setString(3, Integer.toString(player.getPoints()));
+            ps.setString(4, Integer.toString(player.getTotalWins()));
+            ps.setString(5, Integer.toString(player.getTotalLosses()));
+            ps.setString(6, Integer.toString(player.getTotalAfk()));
+            ps.setString(7, Integer.toString(player.getTotalDraw()));
+            
+            ps.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean checkExistAccount(Player player){
+        boolean result = false;
+        String sql = "SELECT username FROM players WHERE username = ?";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, player.getUsername());
 
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                result = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
     public String checkLogin(Player player) {
         boolean result = false;
         String sql = "SELECT username, password FROM players WHERE username = ? AND password = ?";

@@ -4,6 +4,7 @@ import java.net.Socket;
 
 import client.network.ClientListening;
 
+import client.view.RegisterFrm;
 import client.view.ConnectFrm;
 import client.view.HistoryFrm;
 import client.view.LoginFrm;
@@ -37,7 +38,7 @@ public class ClientCtr {
     private ResultFrm resultFrm;
     private HistoryFrm historyFrm;
     private RankingFrm rankingFrm;
-
+    private RegisterFrm registerFrm;
     public ClientCtr(ConnectFrm connectFrm) throws IOException {
         this.connectFrm = connectFrm;
     }
@@ -103,6 +104,14 @@ public class ClientCtr {
 
     public LoginFrm getLoginFrm() {
         return loginFrm;
+    }
+
+    public RegisterFrm getRegisterFrm() {
+        return registerFrm;
+    }
+
+    public void setRegisterFrm(RegisterFrm registerFrm) {
+        this.registerFrm = registerFrm;
     }
 
     public void setLoginFrm(LoginFrm loginFrm) {
