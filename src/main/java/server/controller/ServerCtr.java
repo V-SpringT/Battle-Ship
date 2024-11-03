@@ -1,20 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package server.controller;
 
-import java.io.EOFException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
-import shared.model.IPAddress;
-import shared.model.ObjectWrapper;
+import shared.dto.IPAddress;
+import shared.dto.ObjectWrapper;
 import server.network.ServerListening;
 import server.network.ServerProcessing;
 import server.view.ServerMainFrm;
@@ -26,6 +17,7 @@ public class ServerCtr {
     private ServerListening myListening;
     private ArrayList<ServerProcessing> myProcess;
     private IPAddress myAddress = new IPAddress("localhost", 8888);
+//    private IPAddress myAddress = new IPAddress("26.87.126.183", 8888);
 
     public ServerCtr(ServerMainFrm view) {
         myProcess = new ArrayList<ServerProcessing>();
@@ -67,13 +59,6 @@ public class ServerCtr {
         }
     }
 
-    public void publicClientNumber() {
-        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER, myProcess.size());
-        for (ServerProcessing sp : myProcess) {
-            sp.sendData(data);
-        }
-    }
-
     public void addServerProcessing(ServerProcessing sp) {
         myProcess.add(sp);
         view.showMessage("Number of client connecting to the server: " + myProcess.size());
@@ -93,4 +78,34 @@ public class ServerCtr {
     public ServerSocket getMyServer() {
         return myServer;
     }
+
+    public ArrayList<ServerProcessing> getMyProcess() {
+        return myProcess;
+    }
+
+    public void publicClientNumber() {
+        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER, myProcess.size());
+        for (ServerProcessing sp : myProcess) {
+            sp.sendData(data);
+        }
+    }
+
+    public void sendWaitingList() {
+        String listUsername = "";
+        for (ServerProcessing sp : myProcess) {
+            if (!sp.isInGame() && sp.isIsOnline()) {
+                listUsername += sp.getUsername() + "||";
+                System.out.println(sp.getUsername());
+            }
+        }
+
+        System.out.println("Server send waiting list:");
+        System.out.println(listUsername);
+        ObjectWrapper data = new ObjectWrapper(ObjectWrapper.SERVER_INFORM_CLIENT_WAITING, listUsername);
+        System.out.println(data);
+        for (ServerProcessing sp : myProcess) {
+            sp.sendData(data);
+        }
+    }
+
 }

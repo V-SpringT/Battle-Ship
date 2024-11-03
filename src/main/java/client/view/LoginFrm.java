@@ -1,11 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.ClientCtr;
-import shared.model.ObjectWrapper;
+import shared.dto.ObjectWrapper;
 import shared.model.Player;
 
 public class LoginFrm extends javax.swing.JFrame {
@@ -16,7 +12,7 @@ public class LoginFrm extends javax.swing.JFrame {
         mySocket = socket;
         initComponents();
 
-        mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, this));
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -33,7 +29,7 @@ public class LoginFrm extends javax.swing.JFrame {
         btnLogin = new javax.swing.JButton();
         txtResult = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnLogin.setText("Login");
         btnLogin.addActionListener(new java.awt.event.ActionListener() {
@@ -88,12 +84,20 @@ public class LoginFrm extends javax.swing.JFrame {
 
     public void receivedDataProcessing(ObjectWrapper data) {
         String result = (String) data.getData();
-        if (result.equals("0")) {
+        if (result.equals("false")) {
             txtResult.setText("Sai tai khoan/mat khau");
         } else {
-            mySocket.setPlayerId(Integer.parseInt(result));
-            MainFrm mainFrm = new MainFrm(mySocket);
-            mainFrm.setVisible(true);
+            mySocket.setUsername(txtUsername.getText());
+            System.out.println(txtUsername.getText());
+
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.LOGIN_SUCCESSFUL, mySocket.getUsername()));
+
+            if (mySocket.getMainFrm() == null) {
+                MainFrm mainFrm = new MainFrm(mySocket);
+                mySocket.setMainFrm(mainFrm);
+            }
+
+            mySocket.getMainFrm().setVisible(true);
             this.dispose();
         }
     }

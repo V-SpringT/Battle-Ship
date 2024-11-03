@@ -1,12 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package client.view;
 
 import client.controller.ClientCtr;
-import shared.model.IPAddress;
-import shared.model.ObjectWrapper;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import shared.dto.IPAddress;
 
 public class ConnectFrm extends javax.swing.JFrame {
 
@@ -14,6 +12,7 @@ public class ConnectFrm extends javax.swing.JFrame {
 
     public ConnectFrm() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -47,7 +46,6 @@ public class ConnectFrm extends javax.swing.JFrame {
 
         jLabel2.setText("Server host:");
 
-        txtServerHost.setEditable(false);
         txtServerHost.setText("localhost");
 
         jLabel3.setText("Server port:");
@@ -127,19 +125,32 @@ public class ConnectFrm extends javax.swing.JFrame {
 
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
         if (!txtServerHost.getText().isEmpty() && (txtServerHost.getText().trim().length() > 0)
-                && !txtServerPort.getText().isEmpty() && (txtServerPort.getText().trim().length() > 0)) {//custom port
-            int port = Integer.parseInt(txtServerPort.getText().trim());
-            myControl = new ClientCtr(this, new IPAddress(txtServerHost.getText().trim(), port));
-            // new ClientCtr(this, port);
+                && !txtServerPort.getText().isEmpty() && (txtServerPort.getText().trim().length() > 0)) {
+            try {
+                //custom port
+                int port = Integer.parseInt(txtServerPort.getText().trim());
+                myControl = new ClientCtr(this, new IPAddress(txtServerHost.getText().trim(), port));
+                // new ClientCtr(this, port);
+            } catch (IOException ex) {
+                Logger.getLogger(ConnectFrm.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
-            myControl = new ClientCtr(this);
+            try {
+                myControl = new ClientCtr(this);
+            } catch (IOException ex) {
+                Logger.getLogger(ConnectFrm.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         if (myControl.openConnection()) {
             btnDisconnect.setEnabled(true);
             btnConnect.setEnabled(false);
 
-            LoginFrm lgv = new LoginFrm(myControl);
-            lgv.setVisible(true);
+            if (myControl.getLoginFrm() == null) {
+                LoginFrm loginFrm = new LoginFrm(myControl);
+                myControl.setLoginFrm(loginFrm);
+            }
+
+            myControl.getLoginFrm().setVisible(true);
         } else {
             resetClient();
         }
@@ -157,7 +168,6 @@ public class ConnectFrm extends javax.swing.JFrame {
     public void resetClient() {
         if (myControl != null) {
             myControl.closeConnection();
-            myControl.getActiveFunction().clear();
             myControl = null;
         }
         btnDisconnect.setEnabled(false);

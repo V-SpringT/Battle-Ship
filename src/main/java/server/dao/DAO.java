@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DAO {
 
     public static Connection con;
-    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=battleship";
+    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=bantau";
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "sa";
 
