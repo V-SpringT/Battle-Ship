@@ -10,7 +10,8 @@ CREATE TABLE players (
     points INT DEFAULT 0,
     total_wins INT DEFAULT 0,
     total_losses INT DEFAULT 0,
-    total_afk INT DEFAULT 0
+    total_afk INT DEFAULT 0,
+	total_draw INT DEFAULT 0
 );
 go
 
@@ -19,8 +20,8 @@ CREATE TABLE matches (
     user1_username NVARCHAR(50) NOT NULL,
     user2_username NVARCHAR(50) NOT NULL,
     timestamp DATETIME DEFAULT GETDATE(),
-    result_user1 NVARCHAR(10) CHECK (result_user1 IN ('win', 'loss', 'afk', 'cancelled')),
-    result_user2 NVARCHAR(10) CHECK (result_user2 IN ('win', 'loss', 'afk', 'cancelled')),
+    result_user1 NVARCHAR(10) CHECK (result_user1 IN ('win', 'loss', 'afk', 'cancelled', 'draw')),
+    result_user2 NVARCHAR(10) CHECK (result_user2 IN ('win', 'loss', 'afk', 'cancelled', 'draw')),
     points_change_user1 INT CHECK (points_change_user1 IN (1, 0, -1)),
     points_change_user2 INT CHECK (points_change_user2 IN (1, 0, -1)),
     FOREIGN KEY (user1_username) REFERENCES players(username),

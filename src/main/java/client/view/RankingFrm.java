@@ -56,20 +56,20 @@ public class RankingFrm extends javax.swing.JFrame {
 
         tblRanking.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "STT", "Username", "Số trận thắng", "Số trận thua", "Số trận AFK", "Tổng điểm", "Rank"
+                "STT", "Username", "Số trận thắng", "Số trận thua", "Số trận hoà", "Số trận AFK", "Tổng điểm", "Rank"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -89,6 +89,7 @@ public class RankingFrm extends javax.swing.JFrame {
             tblRanking.getColumnModel().getColumn(4).setResizable(false);
             tblRanking.getColumnModel().getColumn(5).setResizable(false);
             tblRanking.getColumnModel().getColumn(6).setResizable(false);
+            tblRanking.getColumnModel().getColumn(7).setResizable(false);
         }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -146,7 +147,7 @@ public class RankingFrm extends javax.swing.JFrame {
             case ObjectWrapper.SERVER_SEND_RANKING:
                 List<PlayerHistory> leaderboard = (List<PlayerHistory>) data.getData();
 
-                String[] columnNames = {"STT", "Username", "Số trận thắng", "Số trận thua", "Số trận AFK", "Tổng điểm", "Rank"};
+                String[] columnNames = {"STT", "Username", "Số trận thắng", "Số trận thua", "Số trận hoà", "Số trận AFK", "Tổng điểm", "Rank"};
                 DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
                 int index = 1; // Số thứ tự bắt đầu từ 1
@@ -156,6 +157,7 @@ public class RankingFrm extends javax.swing.JFrame {
                         player.getUsername(),
                         player.getTotalWins(),
                         player.getTotalLosses(),
+                        player.getTotalDraw(),
                         player.getTotalAfk(),
                         player.getPoints(),
                         player.getRanking()

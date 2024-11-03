@@ -45,6 +45,19 @@ public class PlayerDAO extends DAO {
         return false;
     }
 
+    public boolean updateDraw(String username) {
+        String sql = "UPDATE players SET total_draw = total_draw + 1 WHERE username = ?";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, username);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean updateWin(String username) {
         String sql = "UPDATE players SET total_wins = total_wins + 1, points = points + 1 WHERE username = ?";
         try {
@@ -73,7 +86,7 @@ public class PlayerDAO extends DAO {
 
     public PlayerHistory getPlayerInfo(String username) {
         PlayerHistory playerHistory = null;
-        String sql = "SELECT points, total_wins, total_losses, total_afk FROM players WHERE username = ?";
+        String sql = "SELECT points, total_wins, total_losses, total_afk, total_draw FROM players WHERE username = ?";
         try {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, username);
@@ -83,8 +96,9 @@ public class PlayerDAO extends DAO {
                 int totalWins = rs.getInt("total_wins");
                 int totalLosses = rs.getInt("total_losses");
                 int totalAfk = rs.getInt("total_afk");
-                int ranking = calculateRanking(username); 
-                playerHistory = new PlayerHistory(ranking, points, totalWins, totalLosses, totalAfk);
+                int totalDraw = rs.getInt("total_draw");
+                int ranking = calculateRanking(username);
+                playerHistory = new PlayerHistory(ranking, points, totalWins, totalLosses, totalAfk, totalDraw);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,7 +128,7 @@ public class PlayerDAO extends DAO {
     // Lấy danh sách bảng xếp hạng tất cả người chơi
     public List<PlayerHistory> getLeaderboard() {
         List<PlayerHistory> leaderboard = new ArrayList<>();
-        String sql = "SELECT username, points, total_wins, total_losses, total_afk FROM players ORDER BY points DESC, total_afk ASC, total_wins DESC, total_losses DESC";
+        String sql = "SELECT username, points, total_wins, total_losses, total_afk, total_draw FROM players ORDER BY points DESC, total_afk ASC, total_wins DESC, total_losses DESC";
         try {
             PreparedStatement ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -125,7 +139,8 @@ public class PlayerDAO extends DAO {
                 int totalWins = rs.getInt("total_wins");
                 int totalLosses = rs.getInt("total_losses");
                 int totalAfk = rs.getInt("total_afk");
-                leaderboard.add(new PlayerHistory(username, rank, points, totalWins, totalLosses, totalAfk));
+                int totalDraw = rs.getInt("total_draw");
+                leaderboard.add(new PlayerHistory(username, rank, points, totalWins, totalLosses, totalAfk, totalDraw));
                 rank++;
             }
         } catch (Exception e) {

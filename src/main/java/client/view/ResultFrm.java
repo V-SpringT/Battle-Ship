@@ -11,6 +11,7 @@ public class ResultFrm extends javax.swing.JFrame {
         mySocket = clientCtr;
         initComponents();
         setLocationRelativeTo(null);
+        lblResultDetail.setVisible(false);
     }
 
     @Override
@@ -42,6 +43,7 @@ public class ResultFrm extends javax.swing.JFrame {
         lblNameEnemy = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         lblEnemyPoint = new javax.swing.JLabel();
+        lblResultDetail = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -77,14 +79,12 @@ public class ResultFrm extends javax.swing.JFrame {
         lblEnemyPoint.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblEnemyPoint.setText("Không đổi");
 
+        lblResultDetail.setText("h");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(lblResult, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(90, 90, 90))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -118,6 +118,12 @@ public class ResultFrm extends javax.swing.JFrame {
                         .addGap(19, 19, 19)
                         .addComponent(lblPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(104, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblResult, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblResultDetail, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(90, 90, 90))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -126,7 +132,9 @@ public class ResultFrm extends javax.swing.JFrame {
                 .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(lblResult, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(17, 17, 17)
+                .addGap(9, 9, 9)
+                .addComponent(lblResultDetail)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(lblNamePlayer)
@@ -138,7 +146,7 @@ public class ResultFrm extends javax.swing.JFrame {
                     .addComponent(lblNameEnemy)
                     .addComponent(jLabel4)
                     .addComponent(lblEnemyPoint))
-                .addGap(121, 121, 121)
+                .addGap(95, 95, 95)
                 .addComponent(btnBack)
                 .addGap(52, 52, 52))
         );
@@ -166,6 +174,7 @@ public class ResultFrm extends javax.swing.JFrame {
     private javax.swing.JLabel lblPlayer;
     private javax.swing.JLabel lblPlayerPoint;
     private javax.swing.JLabel lblResult;
+    private javax.swing.JLabel lblResultDetail;
     // End of variables declaration//GEN-END:variables
 
     public void receivedDataProcessing(ObjectWrapper data) {
@@ -189,10 +198,19 @@ public class ResultFrm extends javax.swing.JFrame {
                     lblEnemyPoint.setText("+1");
                     lblPlayerPoint.setText("Không đổi");
                 } else if (result.equals("cancelled")) {
-                    lblResult.setText("ĐỐI THỦ CỦA BẠN ĐÃ RỜI ĐI");
+                    lblResult.setText("TRẬN ĐẤU KẾT THÚC");
+                    lblResultDetail.setVisible(true);
+                    lblResultDetail.setText("Trận đấu kết thúc vì đối thủ của bạn đã rời đi");
                     lblEnemyPoint.setText("-1");
                     lblPlayerPoint.setText("Không đổi");
+                } else if (result.equals("draw")) {
+                    lblResult.setText("HOÀ");
+                    lblResultDetail.setVisible(true);
+                    lblResultDetail.setText("Trận đấu kết thúc vì cả 2 người chơi bỏ lượt liên tục 3 lần");
+                    lblEnemyPoint.setText("Không đổi");
+                    lblPlayerPoint.setText("Không đổi");
                 }
+
                 break;
         }
     }

@@ -79,6 +79,9 @@ public class ClientListening extends Thread {
                             case ObjectWrapper.SERVER_TRANSFER_END_GAME:
                                 clientCtr.getPlayFrm().receivedDataProcessing(data);
                                 break;
+                            case ObjectWrapper.SERVER_TRANSFER_END_GAME_DRAW:
+                                clientCtr.getPlayFrm().receivedDataProcessing(data);
+                                break;
                             case ObjectWrapper.SERVER_SEND_RESULT:
                                 clientCtr.getResultFrm().receivedDataProcessing(data);
                                 break;

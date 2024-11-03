@@ -14,6 +14,7 @@ public class GameCtr {
     private boolean playerTurn = true;
     private boolean setup = false; // đặt tàu xong
     private boolean shot = false;  // bắn xong trong lượt
+    private int cntMissTurn = 0;
 
     // Thêm các biến để theo dõi trạng thái tàu
     private Map<String, Set<String>> shipGroups = new HashMap<>(); // Map để lưu các nhóm tàu
@@ -142,6 +143,14 @@ public class GameCtr {
 
         // So sánh với số ô đã bắn trúng
         return hitPositions.size() == totalShipPositions;
+    }
+
+    public int getCntMissTurn() {
+        return cntMissTurn;
+    }
+
+    public void setCntMissTurn(int cntMissTurn) {
+        this.cntMissTurn = cntMissTurn;
     }
 
 }

@@ -106,7 +106,7 @@ public class ServerProcessing extends Thread {
                             if (!enemy.inGame && enemy.isOnline) {
                                 enemy.enemy = this;
                                 inGame = true;
-                                enemy.inGame = true;                              
+                                enemy.inGame = true;
                                 enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
                                 gameCtr = new GameCtr();
@@ -166,6 +166,7 @@ public class ServerProcessing extends Thread {
                             break;
                         case ObjectWrapper.SHOOT_REQUEST:
                             gameCtr.setShot(true);
+                            gameCtr.setCntMissTurn(0);
                             String location = (String) data.getData();
                             Object[] result = gameCtr.handleShot(location);
                             stopAllTimers();
@@ -214,6 +215,8 @@ public class ServerProcessing extends Thread {
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "loss||" + enemy.getUsername()));
                             } else if (this.result.equals("cancelled")) {
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "cancelled||" + enemy.getUsername()));
+                            } else if (this.result.equals("draw")) {
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_SEND_RESULT, "draw||" + enemy.getUsername()));
                             }
                             break;
                         case ObjectWrapper.QUIT_WHEN_SET_SHIP:
@@ -378,13 +381,29 @@ public class ServerProcessing extends Thread {
 
                     // Hết thời gian vẫn chưa bắn (trong lúc xếp)
                     if (!gameCtr.isShot() && gameCtr.isPlayerTurn()) {
-                        System.out.println("Server, người chưa bắn là: " + username);
-                        sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
-                        enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
-                        gameCtr.setShot(false);
-                        gameCtr.setPlayerTurn(false);
-                        enemy.gameCtr.setPlayerTurn(true);
-                        enemy.countDownPlay(16);
+                        gameCtr.setCntMissTurn(gameCtr.getCntMissTurn() + 1);
+                        // cả 2 bỏ liên tục 3 lượt -> hoà
+                        if (gameCtr.getCntMissTurn() == 3 && enemy.gameCtr.getCntMissTurn() == 3) {
+                            result = "draw";
+                            enemy.result = "draw";
+                            // update result match ở đây (DAO)
+                            Match match = new Match(username, enemy.username, "draw", "draw", 0, 0);
+                            matchDAO.updateMatchResult(match);
+
+                            playerDAO.updateDraw(username);
+                            playerDAO.updateDraw(enemy.username);
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_END_GAME_DRAW));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_END_GAME_DRAW));
+                        } 
+                        else {
+                            System.out.println("Server, người chưa bắn là: " + username);
+                            sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
+                            enemy.sendData(new ObjectWrapper(ObjectWrapper.SERVER_TRANSFER_SHOOT_MISS_TURN));
+                            gameCtr.setShot(false);
+                            gameCtr.setPlayerTurn(false);
+                            enemy.gameCtr.setPlayerTurn(true);
+                            enemy.countDownPlay(16);
+                        }
                     }
                 }
             }

@@ -35,7 +35,7 @@ public class ObjectWrapper implements Serializable {
     // client kia từ chối
     public static final int REJECTED_PLAY_REQUEST = 11;
 
-    // ?
+    // 
     public static final int SERVER_REJECTED_PLAY_REQUEST = 12;
 
     // client gửi request này tức logout ở mainfrm
@@ -78,6 +78,9 @@ public class ObjectWrapper implements Serializable {
 
     // server gửi bắn trúng và phá huỷ 1 con tàu đến cả 2 để vẽ, gửi kèm list string location tàu đó, kết thúc game
     public static final int SERVER_TRANSFER_END_GAME = 30;
+    
+    // xác định cả 2 bỏ lượt liên tục 3 lần, game kết thúc hoà
+    public static final int SERVER_TRANSFER_END_GAME_DRAW = 17;
 
     // server gửi thông tin mất lượt (không bắn khi đến lượt) về cho cả 2
     public static final int SERVER_TRANSFER_SHOOT_MISS_TURN = 32;

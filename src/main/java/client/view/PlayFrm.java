@@ -373,6 +373,17 @@ public class PlayFrm extends javax.swing.JFrame {
                 mySocket.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
+            case ObjectWrapper.SERVER_TRANSFER_END_GAME_DRAW:
+                txtLog.append("Trận đấu này hoà\n");
+                timer.cancel();
+
+                JOptionPane.showMessageDialog(this, "Trận đấu đã kết thúc, nhấn OK để xem kết quả", "Kết thúc trận đấu", JOptionPane.INFORMATION_MESSAGE);
+                ResultFrm resultFrm2 = new ResultFrm(mySocket);
+                mySocket.setResultFrm(resultFrm2);
+
+                mySocket.getResultFrm().setVisible(true);
+                this.dispose();
+                break;
             case ObjectWrapper.SERVER_TRANSFER_QUIT_WHEN_PLAY:
 //                timeTask.cancel();
                 timer.cancel();

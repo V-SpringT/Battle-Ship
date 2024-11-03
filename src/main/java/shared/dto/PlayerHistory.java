@@ -12,28 +12,31 @@ public class PlayerHistory implements Serializable {
     private int totalWins;
     private int totalLosses;
     private int totalAfk;
-    
+    private int totalDraw;
+
     private List<Match> listMatch;
 
     public PlayerHistory() {
         super();
     }
 
-    public PlayerHistory(String username, int ranking, int points, int totalWins, int totalLosses, int totalAfk) {
+    public PlayerHistory(String username, int ranking, int points, int totalWins, int totalLosses, int totalAfk, int totalDraw) {
         this.username = username;
         this.ranking = ranking;
         this.points = points;
         this.totalWins = totalWins;
         this.totalLosses = totalLosses;
         this.totalAfk = totalAfk;
+        this.totalDraw = totalDraw;
     }
 
-    public PlayerHistory(int ranking, int points, int totalWins, int totalLosses, int totalAfk) {
+    public PlayerHistory(int ranking, int points, int totalWins, int totalLosses, int totalAfk, int totalDraw) {
         this.ranking = ranking;
         this.points = points;
         this.totalWins = totalWins;
         this.totalLosses = totalLosses;
         this.totalAfk = totalAfk;
+        this.totalDraw = totalDraw;
     }
 
     public String getUsername() {
@@ -90,6 +93,14 @@ public class PlayerHistory implements Serializable {
 
     public void setListMatch(List<Match> listMatch) {
         this.listMatch = listMatch;
+    }
+
+    public int getTotalDraw() {
+        return totalDraw;
+    }
+
+    public void setTotalDraw(int totalDraw) {
+        this.totalDraw = totalDraw;
     }
 
     @Override

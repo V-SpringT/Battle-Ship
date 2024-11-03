@@ -89,11 +89,12 @@
         <Component class="javax.swing.JTable" name="tblRanking">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="4">
+              <Table columnCount="8" rowCount="4">
                 <Column editable="false" title="STT" type="java.lang.Integer"/>
                 <Column editable="false" title="Username" type="java.lang.String"/>
                 <Column editable="false" title="S&#x1ed1; tr&#x1ead;n th&#x1eaf;ng" type="java.lang.Object"/>
                 <Column editable="false" title="S&#x1ed1; tr&#x1ead;n thua" type="java.lang.Object"/>
+                <Column editable="false" title="S&#x1ed1; tr&#x1ead;n ho&#xe0;" type="java.lang.Object"/>
                 <Column editable="false" title="S&#x1ed1; tr&#x1ead;n AFK" type="java.lang.Object"/>
                 <Column editable="false" title="T&#x1ed5;ng &#x111;i&#x1ec3;m" type="java.lang.Object"/>
                 <Column editable="false" title="Rank" type="java.lang.Object"/>
@@ -101,6 +102,11 @@
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="false">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="false">
                   <Title/>
                   <Editor/>
