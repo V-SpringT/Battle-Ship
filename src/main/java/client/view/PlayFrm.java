@@ -4,11 +4,15 @@ import client.controller.ClientCtr;
 import server.helper.CountDownTimer;
 import client.helper.ShipDrawer;
 import java.awt.event.ActionEvent;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
@@ -313,6 +317,7 @@ public class PlayFrm extends javax.swing.JFrame {
     public void receivedDataProcessing(ObjectWrapper data) {
         switch (data.getPerformative()) {
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_FAILTURE:
+                 playSound("missing.wav");
                 if (playerTurn) {
                     drawerBtnEnemy.drawMiss((String) data.getData());
                     txtLog.append("Bạn đã bắn hụt\n");
@@ -324,6 +329,7 @@ public class PlayFrm extends javax.swing.JFrame {
                 }
                 break;
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_POINT:
+                playSound("score.wav");
                 if (playerTurn) {
                     drawerBtnEnemy.drawHit((String) data.getData());
                     txtLog.append("Bạn đã bắn trúng 1 con tàu\n");
@@ -336,6 +342,7 @@ public class PlayFrm extends javax.swing.JFrame {
                 break;
             case ObjectWrapper.SERVER_TRANSFER_SHOOT_HIT_SHIP:
                 String[] ship = (String[]) data.getData();
+                playSound("fall.wav");
                 if (playerTurn) {
                     drawerBtnEnemy.drawDestroyedShip(ship);
                     txtLog.append("Bạn đã phá huỷ 1 con tàu " + ship.length + " ô\n");
@@ -357,10 +364,12 @@ public class PlayFrm extends javax.swing.JFrame {
                 break;
             case ObjectWrapper.SERVER_TRANSFER_END_GAME:
                 if (playerTurn) {
+                    playSound("victory.wav");
                     drawerBtnEnemy.drawDestroyedShip((String[]) data.getData());
                     txtLog.append("Bạn đã chiến thắng\n");
                     timer.cancel();
                 } else {
+                    playSound("defeat.wav");
                     drawerBtn.drawDestroyedShip((String[]) data.getData());
                     txtLog.append("Bạn đã thua cuộc\n");
                     timer.cancel();
@@ -374,6 +383,7 @@ public class PlayFrm extends javax.swing.JFrame {
                 this.dispose();
                 break;
             case ObjectWrapper.SERVER_TRANSFER_END_GAME_DRAW:
+                playSound("draw.wav");
                 txtLog.append("Trận đấu này hoà\n");
                 timer.cancel();
 
@@ -394,6 +404,24 @@ public class PlayFrm extends javax.swing.JFrame {
                 mySocket.getResultFrm().setVisible(true);
                 this.dispose();
                 break;
+        }
+    }
+private void playSound(String soundFileName) {
+        try {
+            // Sử dụng ClassLoader để nạp file âm thanh từ thư mục resources
+            InputStream audioSrc = getClass().getClassLoader().getResourceAsStream("Sounds/" + soundFileName);
+            if (audioSrc == null) {
+                System.out.println("File không tồn tại: " + soundFileName);
+                return;
+            }
+
+            // Đọc audio từ InputStream
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioSrc);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
