@@ -71,6 +71,17 @@ public class ServerProcessing extends Thread {
                     ObjectWrapper data = (ObjectWrapper) o;
 
                     switch (data.getPerformative()) {
+                        case ObjectWrapper.REGISTER_USER:
+                            Player registerInfor = (Player) data.getData();
+                            boolean checkRes = playerDAO.checkExistAccount(registerInfor);
+                            if(checkRes){
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_REGISTER_USER, "false"));
+                                break;
+                            }else{
+                                playerDAO.CreateAccount(registerInfor);
+                                sendData(new ObjectWrapper(ObjectWrapper.SERVER_REGISTER_USER, "true"));
+                                break;
+                            }
                         case ObjectWrapper.LOGIN_USER:
                             Player player = (Player) data.getData();
                             sendData(new ObjectWrapper(ObjectWrapper.SERVER_LOGIN_USER, playerDAO.checkLogin(player)));

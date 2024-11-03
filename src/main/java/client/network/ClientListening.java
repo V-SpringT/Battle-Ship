@@ -30,7 +30,10 @@ public class ClientListening extends Thread {
                     if (data.getPerformative() == ObjectWrapper.SERVER_INFORM_CLIENT_NUMBER) {
                         clientCtr.getConnectFrm().showMessage("Number of client connecting to the server: " + data.getData());
                     } else {
-                        switch (data.getPerformative()) {
+                        switch(data.getPerformative()){
+                            case ObjectWrapper.SERVER_REGISTER_USER:
+                                clientCtr.getRegisterFrm().receivedDataProcessing(data);
+                                break;
                             case ObjectWrapper.SERVER_LOGIN_USER:
                                 clientCtr.getLoginFrm().receivedDataProcessing(data);
                                 break;
