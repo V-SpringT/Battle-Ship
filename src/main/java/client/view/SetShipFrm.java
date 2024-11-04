@@ -30,7 +30,7 @@ public class SetShipFrm extends javax.swing.JFrame {
     private int shipSize; //Kích thước tàu hiện tại được chọn để sắp
     private int shipIndexList; //Vị trí tàu được chọn (trong list) hiện tại trong danh sách tàu
     private boolean horizontal = true;
-    
+
     private boolean playerTurn = false;
 
     private CountDownTimer timeTask;
@@ -121,6 +121,10 @@ public class SetShipFrm extends javax.swing.JFrame {
             }
         });
 
+        lblTime.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblTime.setText("12");
+
+        lblWaiting.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         lblWaiting.setText("Waiting enemy ready...");
 
         lblPlayer.setText("name player");
@@ -139,10 +143,8 @@ public class SetShipFrm extends javax.swing.JFrame {
                                 .addComponent(panelMatrixShip, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(6, 6, 6)
-                                        .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(scrollShip, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addComponent(scrollShip, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(31, 31, 31)
                         .addComponent(lblPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -177,13 +179,14 @@ public class SetShipFrm extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(14, 14, 14)
                         .addComponent(lblPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(panelMatrixShip, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(scrollShip, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(panelMatrixShip, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(29, 29, 29)
+                                .addComponent(lblTime, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addComponent(lblWaiting, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -397,7 +400,7 @@ public class SetShipFrm extends javax.swing.JFrame {
     }
 
     private void setCountDownTime() {
-        timeTask = new CountDownTimer(21);
+        timeTask = new CountDownTimer(91);
         timer = new Timer();
         timer.scheduleAtFixedRate(timeTask, 0, 1000);
 
@@ -426,6 +429,12 @@ public class SetShipFrm extends javax.swing.JFrame {
             mySocket.sendData(objectWrapper);
 
             lblWaiting.setVisible(true);
+            for (JToggleButton button : buttonIndex.values()) {
+                button.setEnabled(false);
+            }
+            btnReady.setEnabled(false);
+            btnReset.setEnabled(false);
+            btnRandom.setEnabled(false);
         } else {
             JOptionPane.showMessageDialog(this, "Hãy đặt tất cả tàu");
         }

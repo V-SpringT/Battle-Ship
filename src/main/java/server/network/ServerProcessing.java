@@ -122,8 +122,8 @@ public class ServerProcessing extends Thread {
                                 sendData(new ObjectWrapper(ObjectWrapper.SERVER_SET_GAME_READY));
                                 gameCtr = new GameCtr();
                                 enemy.gameCtr = new GameCtr();
-                                countDownSetShip(21);
-                                enemy.countDownSetShip(21);
+                                countDownSetShip(91);
+                                enemy.countDownSetShip(91);
                                 serverCtr.sendWaitingList();
                             } else {
 //                                enemy.sendData(new ObjectWrapper(ObjectWrapper.ENEMY_IN_GAME_ERROR));
