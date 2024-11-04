@@ -147,11 +147,11 @@ public class RegisterFrm extends javax.swing.JFrame {
         char[] confirmPassword = txtCfPassword.getPassword();
         String CfPasswordPlainText = new String(confirmPassword);
         
-        if(!username.isEmpty()){
+        if(username.isEmpty()){
             txtMessage.setText("Error: Username is empty");
             return;
         }
-        if(!passwordPlainText.isEmpty()){
+        if(passwordPlainText.isEmpty()){
             txtMessage.setText("Error: Password is empty");
             return;
         }
