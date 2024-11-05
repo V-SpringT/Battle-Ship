@@ -5,9 +5,17 @@
     <artifactId>BattleShip</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>8.4.1.jre8</version>
+        </dependency>
+    </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
         <exec.mainClass>com.mycompany.battleship.BattleShip</exec.mainClass>
+        
     </properties>
 </project>
